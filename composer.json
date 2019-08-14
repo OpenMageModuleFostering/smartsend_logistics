@@ -3,7 +3,7 @@
     "type": "magento-module",
     "license": "GPL",
     "homepage": "",
-    "description": "Advanced table rate shipping module with flexible conditions determining the rate and pick-up point during checkout.",
+    "description": "Smart Send Logistics shipping module",
     "authors": [
     {
         "name": "Smart Send ApS",

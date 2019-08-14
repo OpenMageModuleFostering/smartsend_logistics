@@ -79,7 +79,7 @@ class Smartsend_Logistics_Model_Ordermagento extends Smartsend_Logistics_Model_O
 		2308	=>	'Unknown shipping carrier',
 		2309	=>	'Unable to determine shipping method',
 		// Order set
-		2401	=>	'All packages has been shipped. No parcels without trace code exists. Remove existing tracecodes to re-generate labels.',
+		2401	=>	'All packages have been shipped. No parcels without trace code exists. Remove existing tracecodes to re-generate labels.',
 		2402	=>	'No items to ship',
 		2403	=>	'No parcels to ship',
 		// Order get
@@ -186,7 +186,7 @@ class Smartsend_Logistics_Model_Ordermagento extends Smartsend_Logistics_Model_O
 		return array(
 			'receiverid'=> ($this->_order->getShippingAddress()->getId() != '' ? $this->_order->getShippingAddress()->getId() : 'guest-'.rand(100000,999999)),
 			'company'	=> $this->_order->getShippingAddress()->getCompany(),
-			'name1' 	=> $this->_order->getShippingAddress()->getFirstname() .' '. $this->_order->getShippingAddress()->getLastname(),
+			'name1' 	=> $this->_order->getShippingAddress()->getName(),
 			'name2'		=> null,
 			'address1'	=> $this->_order->getShippingAddress()->getStreet(1),
 			'address2'	=> $this->_order->getShippingAddress()->getStreet(2),
@@ -209,7 +209,7 @@ class Smartsend_Logistics_Model_Ordermagento extends Smartsend_Logistics_Model_O
 		return array(
 			'receiverid'=> ($this->_order->getBillingAddress()->getId() != '' ? $this->_order->getBillingAddress()->getId() : 'guest-'.rand(100000,999999)),
 			'company'	=> $this->_order->getBillingAddress()->getCompany(),
-			'name1' 	=> $this->_order->getBillingAddress()->getFirstname() .' '. $this->_order->getBillingAddress()->getLastname(),
+			'name1' 	=> $this->_order->getBillingAddress()->getName(),
 			'name2'		=> null,
 			'address1'	=> $this->_order->getBillingAddress()->getStreet(1),
 			'address2'	=> $this->_order->getBillingAddress()->getStreet(2),
@@ -597,7 +597,7 @@ class Smartsend_Logistics_Model_Ordermagento extends Smartsend_Logistics_Model_O
 		$unshipped_items = $this->getUnshippedItems();
 		
 		// Create array with id's and quantities of unshipped items
-		if(is_array($itemsarray)) {
+		if(is_array($unshipped_items)) {
 			$itemsarray = array();
 			foreach($unshipped_items as $item) {
 				$itemsarray[$item['id']] = $item['quantity'];
@@ -606,35 +606,21 @@ class Smartsend_Logistics_Model_Ordermagento extends Smartsend_Logistics_Model_O
 			$itemsarray = null;
 		}
 
-		/* check order shipment is prossiable or not */
-
-		$email = false;
+		/* check if order shipment is prossiable or not */
+		//An email is only send if a tracking number is returned
+		$email = Mage::getStoreConfig('sales_email/shipment/enabled'); //Setting from: System->Configuration->Sales Emails->Shipment->Enabled
 		$includeComment = false;
 		$comment = "";
 
-		if ($order->canShip()) {
-          
-			$shipmentId = Mage::getModel('sales/order_shipment_api')->create(
-				$order->getIncrementId(), //(string) orderIncrementId - Order increment ID
-				$itemsarray, //(array) itemsQty - Array of orderItemIdQty (optional)
-				$comment, //(string) comment - Shipment comment (optional)
-				$email, //(int) email - Send email flag (optional)
-				$includeComment //(int) includeComment - Include comment in email flag (optional)
-				);
-		
-			if($shipmentId) {
-				//Add a tracecode if one is provided
-				if($tracking_number && $shipmentId) {
-					$carrier_code = 'smartsend'.$this->getShippingCarrier();
+		if( $order->canShip() && !empty($itemsarray) ) {
+			// @var $shipment Mage_Sales_Model_Order_Shipment
+			// prepare to create shipment
+			$shipment = Mage::getModel('sales/service_order', $order)->prepareShipment($itemsarray);
+			if ($shipment) {
+				$shipment->register();
 				
-					$trackmodel = Mage::getModel('sales/order_shipment_api')
-					->addTrack(
-						$shipmentId, //(string) shipmentIncrementId - Shipment increment ID
-						$carrier_code, //(string) carrier - Carrier code (smartsendpostdanmark, smartsendgls)
-						$order->getShippingDescription(), //(string) title - Tracking title
-						$tracking_number //(string) trackNumber - Tracking number
-						);	
-				}
+				//Add a comment. Second parameter is whether or not to email the comment to the user
+				$shipment->addComment($comment, $email && $includeComment);
 				
 				// Set the order status as 'Processing'
 				$order->setIsInProcess($email);
@@ -642,12 +628,41 @@ class Smartsend_Logistics_Model_Ordermagento extends Smartsend_Logistics_Model_O
 				
 				try {
 					$transactionSave = Mage::getModel('core/resource_transaction')
+							->addObject($shipment)
 							->addObject($order)
 							->save();
+					
+					//Set order status as complete
+					//$order->setData('state', Mage_Sales_Model_Order::STATE_COMPLETE);
+					//$order->setData('status', Mage_Sales_Model_Order::STATE_COMPLETE);
+					//$order->save();
 					
 				} catch (Mage_Core_Exception $e) {
 					throw new Exception($this->_errors[2402].': '.$e);
 				}
+				
+				if($tracking_number) {
+					//Get the carrier code
+ 					$carrier_code = 'smartsend'.$this->getShippingCarrier();
+					
+					// Add tracking information to the shipment
+					//$shipment = Mage::getModel('sales/order_shipment')->load($shipment_number);
+					$track = Mage::getModel('sales/order_shipment_track')
+						->setShipment($shipment)
+						->setData('title', $order->getShippingDescription())
+						->setData('number', $tracking_number)
+						->setData('carrier_code', $carrier_code)
+						->setData('order_id', $shipment->getData('order_id'))
+						->save();
+				}
+				
+				//Email the customer that the order is sent
+				if(!$shipment->getEmailSent() && $email){
+					$shipment->sendEmail(true,($includeComment ? $comment : ''));
+					$shipment->setEmailSent(true);
+					$shipment->save();                          
+				}
+				
 			}
 		}
 

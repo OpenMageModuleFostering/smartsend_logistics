@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Smartsend_Logistics>
-            <version>7.1.3</version>
+            <version>7.1.4</version>
         </Smartsend_Logistics>
     </modules>
     <frontend>
@@ -244,7 +244,6 @@
                 <combinepdf>1</combinepdf>
                 <listformat>1</listformat>                      <!-- is listtype #Company, #Street, #Zipcode #City-->
                 <status></status>                      			<!-- order status -->
-                <sendemail>0</sendemail>                      	<!-- send email with shipments -->
                 <includeordercomment>0</includeordercomment>    <!-- include order comment on label -->
             </smartsend>
             <smartsendpostdanmark>

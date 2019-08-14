@@ -178,7 +178,7 @@ class Smartsend_Logistics_Model_Labelmagento extends Smartsend_Logistics_Model_L
 		$this->settings = array(
 			'combine_pdf_labels'	=> Mage::getStoreConfig('carriers/smartsend/combinepdf'),
 			'change_order_status'	=> Mage::getStoreConfig('carriers/smartsend/status'),
-			'send_shipment_mail'	=> Mage::getStoreConfig('carriers/smartsend/sendemail')
+			'send_shipment_mail'	=> Mage::getStoreConfig('sales_email/shipment/enabled')
 			);
 	}
 	
@@ -210,6 +210,8 @@ class Smartsend_Logistics_Model_Labelmagento extends Smartsend_Logistics_Model_L
 	 * @return void
 	 */
 	protected function sendShipmentEmail($order_number,$parcels_succes_array,$customer_email_comments=null) {
+	// An email will automatically be send from the system when a shipment is created
+	/*
 		if(is_array($parcels_succes_array)) {
 			foreach($parcels_succes_array as $parcel) {
 			
@@ -236,6 +238,7 @@ class Smartsend_Logistics_Model_Labelmagento extends Smartsend_Logistics_Model_L
 		} else {
 			throw new Exception( $this->getMessageString(2210) );
 		}
+		*/
 	}
 	
 	/*
@@ -308,6 +311,18 @@ class Smartsend_Logistics_Model_Labelmagento extends Smartsend_Logistics_Model_L
 					->setData('carrier_code', $carrier_code)
 					->setData('order_id', $shipment->getData('order_id'))
 					->save();
+				
+				//An email is only send if a tracking number is returned
+				$email = Mage::getStoreConfig('sales_email/shipment/enabled'); //Setting from: System->Configuration->Sales Emails->Shipment->Enabled
+				$includeComment = false;
+				$comment = "";
+				
+				//Email the customer that the order is sent
+				if(!$shipment->getEmailSent() && $email){
+					$shipment->sendEmail(true,($includeComment ? $comment : ''));
+					$shipment->setEmailSent(true);
+					$shipment->save();                          
+				}
 			} else {
 				throw new Exception( $this->getMessageString(2208) );
 			}
