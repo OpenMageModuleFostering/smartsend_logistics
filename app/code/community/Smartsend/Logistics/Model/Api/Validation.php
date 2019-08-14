@@ -1,0 +1,61 @@
+<?php
+
+/**
+ * Smartsend_Logistics
+ *
+ * This source file is subject to the GNU General Public License v3.0
+ * that is bundled with this package in the file license.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.html
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@smartsend.dk so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade the plugin to newer
+ * versions in the future. If you wish to customize the plugin for your
+ * needs please refer to http://www.smartsend.dk
+ *
+ * @folder		/app/code/community/Smartsend/Logistics/Model/Api/Validation.php
+ * @category	Smartsend
+ * @package		Smartsend_Logistics
+ * @author		Anders Bilfeldt
+ * @url			www.smartsend.dk
+ */
+class Smartsend_Logistics_Model_Api_Validation extends Mage_Core_Model_Abstract {
+
+    public function _verify($username, $licensekey) {
+        
+        $ch = curl_init();
+
+        /* Script URL */
+        $url = 'http://smartsend-prod.apigee.net/v7/verify_user';
+
+        curl_setopt($ch, CURLOPT_URL, $url);               //curl url
+        curl_setopt($ch, CURLOPT_HTTPGET, true);               //curl request method
+        //curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        	'apikey:yL18TETUVQ7E9pgVb6JeV1erIYHAMcwe',
+        	'smartsendmail:'.$username,
+        	'smartsendlicence:'.$licensekey,
+        	'cmssystem:Magento',
+        	'cmsversion:'.Mage::getVersion(),
+        	'appversion:'.Mage::getConfig()->getNode('modules/Smartsend_Logistics')->version
+        	));    //curl request header
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        $result = new StdClass();
+        $result->response = curl_exec($ch);                  //executing curl
+        $result->code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $result->meta = curl_getinfo($ch);
+        curl_close($ch);               //curl closing
+        
+        if($result->code == 200) {
+			return true;
+        } else {
+            return false;
+        }
+    }
+
+}

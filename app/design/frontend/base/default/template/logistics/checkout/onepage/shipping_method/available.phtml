@@ -22,9 +22,7 @@
  * @author		Anders Bilfeldt
  * @url			www.smartsend.dk
  */
-$pickupShippingFee = Mage::getSingleton('logistics/carrier_pickup')->getPickupShippingFee();     //pickup shipping fees
 $bringShippingFee = Mage::getSingleton('logistics/carrier_bring')->getBringShippingFee();           //bring shipping fees
-$swipboxShippingFee = Mage::getSingleton('logistics/carrier_swipbox')->getSwipboxShippingFee();            //swipbox shipping fees
 $glsShippingFee = Mage::getSingleton('logistics/carrier_gls')->getGlsShippingFee();                     //gls shipping fees
 $postdanmarkShippingFee = Mage::getSingleton('logistics/carrier_postdanmark')->getPostdanmarkShippingFee();            //postdanmark shipping fees
 $postenShippingFee = Mage::getSingleton('logistics/carrier_posten')->getPostenShippingFee();                      //posten shipping fees
@@ -45,11 +43,7 @@ if (!($_shippingRateGroups = $this->getShippingRates())):               //if no 
                     <?php
                     $_sole = $_sole && count($_rates) == 1;
                     foreach ($_rates as $_rate):
-                        if ($_rate->getCode() === 'smartsendpickup_smartsendpickup') {                 //get shipping code
-                            $shippingFee = $pickupShippingFee;
-                        } elseif ($_rate->getCode() === 'smartsendswipbox_smartsendswipbox') {
-                            $shippingFee = $swipboxShippingFee;
-                        } elseif ($_rate->getCode() === 'smartsendpostdanmark_smartsendpostdanmark') {
+                        if ($_rate->getCode() === 'smartsendpostdanmark_smartsendpostdanmark') {
                             $shippingFee = $postdanmarkShippingFee;
                         } elseif ($_rate->getCode() === 'smartsendposten_smartsendposten') {
                             $shippingFee = $postenShippingFee;
@@ -86,11 +80,12 @@ if (!($_shippingRateGroups = $this->getShippingRates())):               //if no 
                                 $shipping_method = $_rate->getCode();
                                 $carrier = explode('_', $shipping_method);
                                 $smartsend_carrier = $carrier['0'];
+            					$excludedMethod = Mage::getModel('logistics/shippingMethods')->excludedTax($shipping_method);
 
-                                if (substr($shipping_method, 0, strlen('smartsend')) === 'smartsend' && Mage::getStoreConfig("carriers/" . $smartsend_carrier . "/excludetax")) {
+                                if (substr($shipping_method, 0, strlen('smartsend')) === 'smartsend' && Mage::getStoreConfig("carriers/" . $smartsend_carrier . "/excludetax") && $excludedMethod) {
                                     ?>
                                     <label for="s_method_<?php echo $_rate->getCode() ?>"><?php echo $_rate->getMethodTitle() ?>               <!-- get method title and the code -->
-                                        <?php $_excl = Mage::helper('core')->currency($_rate->getPrice(), true, false); ?>      <!-- get shipping price excluding tax if shipping method does not contains tax -->
+                                        <?php $_excl = $this->getShippingPrice($_rate->getPrice(),0); ?>   <!-- get shipping price excluding tax if shipping method does not contains tax -->
                                         <?php echo $_excl; ?>
 
                                     </label>

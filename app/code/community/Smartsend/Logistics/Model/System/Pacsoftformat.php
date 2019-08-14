@@ -27,8 +27,8 @@
 class Smartsend_Logistics_Model_System_Pacsoftformat extends Mage_Core_Model_Config_Data {
 
     public function toOptionArray() {
-        $opt[] = array('value' => 'link', 'label' => Mage::helper('adminhtml')->__("Pacsoft link"));
-        $opt[] = array('value' => 'pdf', 'label' => Mage::helper('adminhtml')->__("PDF file"));
+        $opt[] = array('value' => 'link', 'label' => Mage::helper('logistics')->__("Pacsoft link"));
+        $opt[] = array('value' => 'pdf', 'label' => Mage::helper('logistics')->__("PDF file"));
         return $opt;
     }
 

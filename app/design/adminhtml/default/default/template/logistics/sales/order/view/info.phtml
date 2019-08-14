@@ -196,63 +196,94 @@ $orderStoreDate = $this->formatDate($_order->getCreatedAtStoreDate(), 'medium', 
     <div class="clear"></div>
     <?php
 endif;
-if(strrpos($_order->getShippingMethod(), "smartsend") !== FALSE): 
-//if ($_order->getShippingMethod() == "smartsendpickup_pickup" || $_order->getShippingMethod() == "smartsendposten_pickup" || $_order->getShippingMethod() == "smartsendpostdanmark_pickup" || $_order->getShippingMethod() == "smartsendbring_pickup" || $_order->getShippingMethod() == "smartsendgls_pickup" || $_order->getShippingMethod() == "smartsendswipbox_pickup"):
-    ?>
+
+// Smart Send
+$smartsendorder = Mage::getModel('logistics/ordermagento');
+$smartsendorder->setOrderObject($_order);
+
+if( $smartsendorder->isSmartsendOrVConnect() ):     ?>
     <div class="box-left">
         <!--Smart Send Pickup-->
         <div class="entry-edit">
             <div class="entry-edit-head">
-                <h4 class="icon-head"><?php echo $this->__('Smart Send Pickup Address') ?></h4>
+                <h4 class="icon-head"><?php echo $this->__('Smart Send Logistics') ?></h4>
             </div>
             <fieldset>
-            	<div style="float: left" >
-            		<?php echo $this->__('Shipping method').': '.$_order->getShippingMethod(); ?>
-                </div>
-                <div class="clear"></div>
-        <?php
-            if(($temp = strlen($_order->getShippingMethod()) - strlen('pickup')) >= 0 && strpos($_order->getShippingMethod(), 'pickup', $temp) !== FALSE) {
+            	<table cellspacing="0" class="form-list">
+                	<tbody>
+						<tr>
+							<td class="label"><label><?php echo $this->__('Shipping method').': '; ?></label></td>
+							<td class="value"><strong><?php echo $_order->getShippingDescription(); ?></label></td>
+						</tr>
+						<!--
+						<tr>
+							<td class="label"><label><?php echo $this->__('Debug').': '; ?></label></td>
+							<td class="value"><strong><?php echo $_order->getShippingMethod(); ?></strong></td>
+						</tr>
+						-->
+			<?php
+			
+			$order_id = $_order->getId();                                             //order id
 
-                $order_id = $_order->getId();                                             //order id
-                if ($_order->getShippingMethod() == "smartsendgls_pickup") {      //smartsend shipping address
-                    $pickupModel = Mage::getModel('logistics/gls');
-                } elseif ($_order->getShippingMethod() == "smartsendswipbox_pickup") {
-                    $pickupModel = Mage::getModel('logistics/swipbox');
-                } elseif ($_order->getShippingMethod() == "smartsendpostdanmark_pickup") {
-                    $pickupModel = Mage::getModel('logistics/postdanmark');
-                } elseif ($_order->getShippingMethod() == "smartsendposten_pickup") {
-                    $pickupModel = Mage::getModel('logistics/posten');
-                } elseif ($_order->getShippingMethod() == "smartsendbring_pickup") {
-                    $pickupModel = Mage::getModel('logistics/bring');
-                } elseif ($_order->getShippingMethod() == "smartsendpickup_pickup") {
-                    $pickupModel = Mage::getModel('logistics/pickup');
-                }
+			if( $smartsendorder->isPickup() ) {
+				try{
+					$pickuppoint = $smartsendorder->getPickupData($_order);
+				} catch(Exception $e) {
+					//Will be shipping to closest pickup point
+				}
+				?>
+						<tr>
+							<td class="label"><label><?php echo $this->__("Pickuppoint"); ?></label></td>
+				<?php
 
-                if ($pickupModel) {
-                    $pickupData = $pickupModel->getCollection()->addFieldToFilter('order_id', $order_id)->getFirstItem();        //pickup data 
+				if ($pickuppoint) {
+							?>
+							<td class="value"><strong><?php echo $this->__("ID") .': '. $pickuppoint['agentno'].'<br>'.$pickuppoint['company'] . "<br>" . $pickuppoint['address1'] . "<br>" .$pickuppoint['country'] . ' ' . $pickuppoint['zip'] . " " . $pickuppoint['city']; ?></strong></td>
+							<?php
+				} else {
+							?>
+							<td class="value"><strong><?php echo $this->__("Shipping to closest pickup point"); ?></strong></td>
+							<?php
+				}
+						?>
+						<tr>
+						<?php
+			}
 
-                    if ($pickupData->getData()) {
-                    	if($pickupData->getPickUpId() != '' && $pickupData->getPickUpId() != '000') {
-                        	echo $this->__("Carrier") . ": ".$pickupData->getCarrier() . "<br><br>";
-                        	echo $this->__("Pickup Point Id") . ": " . $pickupData->getPickUpId() . "<br>";                      //pickup id         
-                            echo $pickupData->getCompany() . "<br>" . $pickupData->getStreet() . "<br>" . $pickupData->getZip() . " " . $pickupData->getCity() . "<br>" . $pickupData->getCountry();            //pickup address
-						} else {
-							echo $this->__("Shipping to closest pickup point");
-						}
-        			} else {
-           				echo $this->__("Record not found");
-        			}
-                }
-            } else {
-    			echo $this->__("Not a pickup point");
-    		}
-    	?>
-    			<div style="float: right" >
-                	<input type="button" class="form-button" value="<?php echo Mage::helper('logistics')->__('Generate label') ?>" title="<?php echo Mage::helper('logistics')->__('Generate label') ?>" onclick="setLocation('<?php echo $this->getUrl("logistics/logistics/label",array('order_id' => $_order->getId())); ?>')"/>
-					<input type="button" class="form-button" value="<?php echo Mage::helper('logistics')->__('Generate return label') ?>" title="<?php echo Mage::helper('logistics')->__('Generate return label') ?>" onclick="setLocation('<?php echo $this->getUrl("logistics/logistics/labelreturn",array('order_id' => $_order->getId())); ?>')" />
-                </div>   
-                <div class="clear"></div>
-            </fieldset>
+			$carrier = explode('_', $_order->getShippingMethod());
+
+			if ($carrier[0] == 'smartsendpostdanmark' || $carrier[0] == 'smartsendposten') {
+				$flexModel = Mage::getModel('logistics/flex');
+				$flexData = $flexModel->getCollection()->addFieldToFilter('order_id', $order_id)->getFirstItem();        //pickup data 
+				if ($flexData->getData()) {
+					?>
+						<tr>
+					<?php
+					if ($flexData->getFlexnote() != '') {
+							?>
+							<td class="label"><label><?php echo $this->__("Flexdelivery note"); ?></label></td>
+							<td class="value"><strong><?php echo $flexData->getFlexnote(); ?></label></td>
+							<?php
+					} else {
+							?>
+							<td class="value"><strong><?php echo $this->__("Flexdelivery instruction not available"); ?></label></td>
+							<?php
+					}
+					?>
+						<tr>
+					<?php
+				}
+			}
+			?>
+					</tbody>
+				</table>
+				<div class="clear"></div>
+				<div style="float: right" >
+					<input type="button" class="form-button" value="<?php echo Mage::helper('logistics')->__('Generate label') ?>" title="<?php echo Mage::helper('logistics')->__('Generate label') ?>" onclick="setLocation('<?php echo $this->getUrl("*/logistics/labelNormal",array('order_id' => $_order->getId())); ?>')"/>
+					<input type="button" class="form-button" value="<?php echo Mage::helper('logistics')->__('Generate return label') ?>" title="<?php echo Mage::helper('logistics')->__('Generate return label') ?>" onclick="setLocation('<?php echo $this->getUrl("*/logistics/labelReturn",array('order_id' => $_order->getId())); ?>')" />
+					<input type="button" class="form-button" value="<?php echo Mage::helper('logistics')->__('Generate normal and return label') ?>" title="<?php echo Mage::helper('logistics')->__('Generate normal and return label') ?>" onclick="setLocation('<?php echo $this->getUrl("*/logistics/labelNormalReturn",array('order_id' => $_order->getId())); ?>')" />
+				</div>
+			</fieldset>
         </div>
     </div>
     <div class="clear"></div>

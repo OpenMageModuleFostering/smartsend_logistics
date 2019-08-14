@@ -24,6 +24,7 @@
  * @url			www.smartsend.dk
  */
 $installer = $this;
+Mage::log('Starting installation');
 
 $installer->startSetup();            //start setup
 
@@ -31,7 +32,6 @@ $installer->run("
     DROP TABLE IF EXISTS {$this->getTable('order_shipping_pickup')};               
     DROP TABLE IF EXISTS {$this->getTable('order_shipping_postdanmark')};
 	DROP TABLE IF EXISTS {$this->getTable('order_shipping_posten')};
-    DROP TABLE IF EXISTS {$this->getTable('order_shipping_swipbox')};
     DROP TABLE IF EXISTS {$this->getTable('order_shipping_bring')};
     DROP TABLE IF EXISTS {$this->getTable('order_shipping_gls')};
 	CREATE TABLE IF NOT EXISTS {$this->getTable('smartsend_pickup')} (
@@ -51,74 +51,283 @@ $installer->run("
 
 /* standard values for the table rate */
 
-for ($i = 0; $i < 6; $i++) {
+$install_shipping_methods = array(
+	"posten"	=> array(
+		array(
+			'orderminprice'			=> 0,
+			'ordermaxprice'			=> 500,
+			'orderminweight'		=> 0,
+			'ordermaxweight'		=> 100000,
+			'pickupshippingfee'		=> 40,
+			'countries'				=> 'SE',
+			'methods'				=> 'pickup',
+			'method_name'			=> Mage::helper('logistics')->__('Pickuppoint'),
+			'_id'					=> '_' . number_format(microtime(true),0,'.','') . '_' . rand(100, 999)
+			),
+		array(
+			'orderminprice'			=> 500,
+			'ordermaxprice'			=> 100000,
+			'orderminweight'		=> 0,
+			'ordermaxweight'		=> 100000,
+			'pickupshippingfee'		=> 0,
+			'countries'				=> 'SE',
+			'methods'				=> 'pickup',
+			'method_name'			=> Mage::helper('logistics')->__('Pickuppoint'),
+			'_id'					=> '_' . number_format(microtime(true),0,'.','') . '_' . rand(100, 999)
+			),
+		array(
+			'orderminprice'			=> 0,
+			'ordermaxprice'			=> 500,
+			'orderminweight'		=> 0,
+			'ordermaxweight'		=> 100000,
+			'pickupshippingfee'		=> 50,
+			'countries'				=> 'SE',
+			'methods'				=> 'privatehome',
+			'method_name'			=> Mage::helper('logistics')->__('Private to home'),
+			'_id'					=> '_' . number_format(microtime(true),0,'.','') . '_' . rand(100, 999)
+			),
+		array(
+			'orderminprice'			=> 500,
+			'ordermaxprice'			=> 100000,
+			'orderminweight'		=> 0,
+			'ordermaxweight'		=> 100000,
+			'pickupshippingfee'		=> 10,
+			'countries'				=> 'SE',
+			'methods'				=> 'privatehome',
+			'method_name'			=> Mage::helper('logistics')->__('Private to home'),
+			'_id'					=> '_' . number_format(microtime(true),0,'.','') . '_' . rand(100, 999)
+			)
+		),
+	"postdanmark"	=> array(
+		array(
+			'orderminprice'			=> 0,
+			'ordermaxprice'			=> 500,
+			'orderminweight'		=> 0,
+			'ordermaxweight'		=> 100000,
+			'pickupshippingfee'		=> 40,
+			'countries'				=> 'DK',
+			'methods'				=> 'pickup',
+			'method_name'			=> Mage::helper('logistics')->__('Pickuppoint'),
+			'_id'					=> '_' . number_format(microtime(true),0,'.','') . '_' . rand(100, 999)
+			),
+		array(
+			'orderminprice'			=> 500,
+			'ordermaxprice'			=> 100000,
+			'orderminweight'		=> 0,
+			'ordermaxweight'		=> 100000,
+			'pickupshippingfee'		=> 0,
+			'countries'				=> 'DK',
+			'methods'				=> 'pickup',
+			'method_name'			=> Mage::helper('logistics')->__('Pickuppoint'),
+			'_id'					=> '_' . number_format(microtime(true),0,'.','') . '_' . rand(100, 999)
+			),
+		array(
+			'orderminprice'			=> 0,
+			'ordermaxprice'			=> 500,
+			'orderminweight'		=> 0,
+			'ordermaxweight'		=> 100000,
+			'pickupshippingfee'		=> 50,
+			'countries'				=> 'DK',
+			'methods'				=> 'privatehome',
+			'method_name'			=> Mage::helper('logistics')->__('Private to home'),
+			'_id'					=> '_' . number_format(microtime(true),0,'.','') . '_' . rand(100, 999)
+			),
+		array(
+			'orderminprice'			=> 500,
+			'ordermaxprice'			=> 100000,
+			'orderminweight'		=> 0,
+			'ordermaxweight'		=> 100000,
+			'pickupshippingfee'		=> 10,
+			'countries'				=> 'DK',
+			'methods'				=> 'privatehome',
+			'method_name'			=> Mage::helper('logistics')->__('Private to home'),
+			'_id'					=> '_' . number_format(microtime(true),0,'.','') . '_' . rand(100, 999)
+			),
+		array(
+			'orderminprice'			=> 0,
+			'ordermaxprice'			=> 500,
+			'orderminweight'		=> 0,
+			'ordermaxweight'		=> 100000,
+			'pickupshippingfee'		=> 90,
+			'countries'				=> 'SE,NO,FI',
+			'methods'				=> 'private',
+			'method_name'			=> Mage::helper('logistics')->__('Private'),
+			'_id'					=> '_' . number_format(microtime(true),0,'.','') . '_' . rand(100, 999)
+			),
+		array(
+			'orderminprice'			=> 500,
+			'ordermaxprice'			=> 100000,
+			'orderminweight'		=> 0,
+			'ordermaxweight'		=> 100000,
+			'pickupshippingfee'		=> 50,
+			'countries'				=> 'SE,NO,FI',
+			'methods'				=> 'private',
+			'method_name'			=> Mage::helper('logistics')->__('Private'),
+			'_id'					=> '_' . number_format(microtime(true),0,'.','') . '_' . rand(100, 999)
+			),
+		array(
+			'orderminprice'			=> 0,
+			'ordermaxprice'			=> 100000,
+			'orderminweight'		=> 0,
+			'ordermaxweight'		=> 3,
+			'pickupshippingfee'		=> 300,
+			'countries'				=> 'FO,GL',
+			'methods'				=> 'private',
+			'method_name'			=> Mage::helper('logistics')->__('Private'),
+			'_id'					=> '_' . number_format(microtime(true),0,'.','') . '_' . rand(100, 999)
+			),
+		array(
+			'orderminprice'			=> 0,
+			'ordermaxprice'			=> 100000,
+			'orderminweight'		=> 3,
+			'ordermaxweight'		=> 10,
+			'pickupshippingfee'		=> 400,
+			'countries'				=> 'FO,GL',
+			'methods'				=> 'private',
+			'method_name'			=> Mage::helper('logistics')->__('Private'),
+			'_id'					=> '_' . number_format(microtime(true),0,'.','') . '_' . rand(100, 999)
+			),
+		array(
+			'orderminprice'			=> 0,
+			'ordermaxprice'			=> 100000,
+			'orderminweight'		=> 10,
+			'ordermaxweight'		=> 20,
+			'pickupshippingfee'		=> 500,
+			'countries'				=> 'FO,GL',
+			'methods'				=> 'private',
+			'method_name'			=> Mage::helper('logistics')->__('Private'),
+			'_id'					=> '_' . number_format(microtime(true),0,'.','') . '_' . rand(100, 999)
+			)
+		),
+	"gls"	=> array(
+		array(
+			'orderminprice'			=> 0,
+			'ordermaxprice'			=> 500,
+			'orderminweight'		=> 0,
+			'ordermaxweight'		=> 100000,
+			'pickupshippingfee'		=> 40,
+			'countries'				=> 'DK',
+			'methods'				=> 'pickup',
+			'method_name'			=> Mage::helper('logistics')->__('Pickuppoint'),
+			'_id'					=> '_' . number_format(microtime(true),0,'.','') . '_' . rand(100, 999)
+			),
+		array(
+			'orderminprice'			=> 500,
+			'ordermaxprice'			=> 100000,
+			'orderminweight'		=> 0,
+			'ordermaxweight'		=> 100000,
+			'pickupshippingfee'		=> 0,
+			'countries'				=> 'DK',
+			'methods'				=> 'pickup',
+			'method_name'			=> Mage::helper('logistics')->__('Pickuppoint'),
+			'_id'					=> '_' . number_format(microtime(true),0,'.','') . '_' . rand(100, 999)
+			),
+		array(
+			'orderminprice'			=> 0,
+			'ordermaxprice'			=> 500,
+			'orderminweight'		=> 0,
+			'ordermaxweight'		=> 100000,
+			'pickupshippingfee'		=> 50,
+			'countries'				=> 'DK',
+			'methods'				=> 'privatehome',
+			'method_name'			=> Mage::helper('logistics')->__('Private to home'),
+			'_id'					=> '_' . number_format(microtime(true),0,'.','') . '_' . rand(100, 999)
+			),
+		array(
+			'orderminprice'			=> 500,
+			'ordermaxprice'			=> 100000,
+			'orderminweight'		=> 0,
+			'ordermaxweight'		=> 100000,
+			'pickupshippingfee'		=> 10,
+			'countries'				=> 'DK',
+			'methods'				=> 'privatehome',
+			'method_name'			=> Mage::helper('logistics')->__('Private to home'),
+			'_id'					=> '_' . number_format(microtime(true),0,'.','') . '_' . rand(100, 999)
+			)
+		),
+	"bring"	=> array(
+		array(
+			'orderminprice'			=> 0,
+			'ordermaxprice'			=> 500,
+			'orderminweight'		=> 0,
+			'ordermaxweight'		=> 100000,
+			'pickupshippingfee'		=> 40,
+			'countries'				=> 'DK',
+			'methods'				=> 'pickup',
+			'method_name'			=> Mage::helper('logistics')->__('Pickuppoint'),
+			'_id'					=> '_' . number_format(microtime(true),0,'.','') . '_' . rand(100, 999)
+			),
+		array(
+			'orderminprice'			=> 500,
+			'ordermaxprice'			=> 100000,
+			'orderminweight'		=> 0,
+			'ordermaxweight'		=> 100000,
+			'pickupshippingfee'		=> 0,
+			'countries'				=> 'DK',
+			'methods'				=> 'pickup',
+			'method_name'			=> Mage::helper('logistics')->__('Pickuppoint'),
+			'_id'					=> '_' . number_format(microtime(true),0,'.','') . '_' . rand(100, 999)
+			),
+		array(
+			'orderminprice'			=> 0,
+			'ordermaxprice'			=> 500,
+			'orderminweight'		=> 0,
+			'ordermaxweight'		=> 100000,
+			'pickupshippingfee'		=> 50,
+			'countries'				=> 'DK',
+			'methods'				=> 'privatehome',
+			'method_name'			=> Mage::helper('logistics')->__('Private to home'),
+			'_id'					=> '_' . number_format(microtime(true),0,'.','') . '_' . rand(100, 999)
+			),
+		array(
+			'orderminprice'			=> 500,
+			'ordermaxprice'			=> 100000,
+			'orderminweight'		=> 0,
+			'ordermaxweight'		=> 100000,
+			'pickupshippingfee'		=> 10,
+			'countries'				=> 'DK',
+			'methods'				=> 'privatehome',
+			'method_name'			=> Mage::helper('logistics')->__('Private to home'),
+			'_id'					=> '_' . number_format(microtime(true),0,'.','') . '_' . rand(100, 999)
+			)
+		)
+	);	
+		
+
+for ($i = 1; $i < 5; $i++) {
 
     switch ($i) {                      //shipping method case
-        case 0:
-            $carrier = "groups[smartsendpickup]";
-            break;
         case 1:
-            $carrier = "groups[smartsendpostdanmark]";
+            $carrier = "postdanmark";
+            $path = 'carriers/smartsendpostdanmark/price';
+            $shipping_methods = $install_shipping_methods['postdanmark'];
             break;
         case 2:
-            $carrier = "groups[smartsendbring]";
+            $carrier = "bring";
+            $path = 'carriers/smartsendbring/price';
+            $shipping_methods = $install_shipping_methods['bring'];
             break;
         case 3:
-            $carrier = "groups[smartsendswipbox]";
+            $carrier = "gls";
+            $path = 'carriers/smartsendgls/price';
+            $shipping_methods = $install_shipping_methods['gls'];
             break;
         case 4:
-            $carrier = "groups[smartsendgls]";
-            break;
-        case 5:
-            $carrier = "groups[smartsendposten]";
+            $carrier = "posten";
+            $path = 'carriers/smartsendposten/price';
+            $shipping_methods = $install_shipping_methods['posten'];
             break;
     }
 
-    $shippingmethods = Mage::getModel('logistics/shippingMethods')->getOptionArray($carrier);    //getting shipping methods  for carriers
+	$ettings = "groups[smartsend".$carrier."]";
 
-    $priceResult = array();
+    $shipping_methods = $install_shipping_methods[$carrier];
 
-    $shippingArray_NotStandard = array('DPDguranty', 'Valuemail', 'Valuemailfirstclass', 'Valuemaileconomy', 'Maximail');        //shipping methods not having standard settings
+	$priceResult = array();
+    foreach ($shipping_methods as $shipping_method) {
 
-    foreach ($shippingmethods as $key => $value) {
+		$priceResult[$shipping_method['_id']] = $shipping_method;
 
-        if (!in_array($value, $shippingArray_NotStandard)) {
-
-            $millisecond = round(microtime(true) * 1000);
-            $id = '_' . $millisecond . '_' . rand(100, 999);        //ids for the values
-
-            $defaultResult = array();
-            $defaultResult['orderminprice'] = 0;
-            $defaultResult['ordermaxprice'] = 100000;
-            $defaultResult['orderminweight'] = 0;
-            $defaultResult['ordermaxweight'] = 100000;
-            $defaultResult['pickupshippingfee'] = 10;
-            $defaultResult['countries'] = 'DK';
-            $defaultResult['_id'] = $id;
-            $defaultResult['methods'] = $key;
-
-            if ($i != 0) {
-                $Title = Mage::getModel('logistics/shippingMethods')->getTitleValue($key);          //getting title value of the shipping method
-                $defaultResult['method_name'] = $Title;
-            }
-
-            $priceResult[$defaultResult['_id']] = $defaultResult;
-
-		}
-	}
-	
-	if ($i == 0) {
-		$path = 'carriers/smartsendpickup/price';
-	} elseif ($i == 1) {
-		$path = 'carriers/smartsendpostdanmark/price';
-	} elseif ($i == 2) {
-		$path = 'carriers/smartsendbring/price';
-	} elseif ($i == 3) {
-		$path = 'carriers/smartsendswipbox/price';
-	} elseif ($i == 4) {
-		$path = 'carriers/smartsendgls/price';
-	} elseif ($i == 5) {
-		$path = 'carriers/smartsendposten/price';
 	}
 
 	$data = array();

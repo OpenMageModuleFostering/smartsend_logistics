@@ -26,14 +26,17 @@
 class Smartsend_Logistics_Model_Observer extends Varien_Object {
 
     public function saveShippingMethod($evt) {             //saving shipping method
-        $request = $evt->getRequest();
-        $quote = $evt->getQuote();
+        $request 		= $evt->getRequest();
+        $quote 			= $evt->getQuote();
+        $quote_id 		= $quote->getId();
         $shippingMethod = $quote->getShippingAddress()->getShippingMethod();       //getting shipping method
-
+        $carrier 		= explode('_', $shippingMethod);
+        $carrier 		= $carrier[0];
+        
+        /* Save data about pickup point */
+        $pickup = array();
         $pickup_t = $request->getParam('shipping_pickup', false);
-        if ($shippingMethod == 'smartsendswipbox_pickup') {
-            $pickup['store'] = $pickup_t['store']['smartsendswipbox_pickup'];
-        } elseif ($shippingMethod == 'smartsendpostdanmark_pickup') {
+        if ($shippingMethod == 'smartsendpostdanmark_pickup') {
             $pickup['store'] = $pickup_t['store']['smartsendpostdanmark_pickup'];
         } elseif ($shippingMethod == 'smartsendposten_pickup') {
             $pickup['store'] = $pickup_t['store']['smartsendposten_pickup'];
@@ -41,33 +44,47 @@ class Smartsend_Logistics_Model_Observer extends Varien_Object {
             $pickup['store'] = $pickup_t['store']['smartsendgls_pickup'];
         } elseif ($shippingMethod == 'smartsendbring_pickup') {
             $pickup['store'] = $pickup_t['store']['smartsendbring_pickup'];
-        } elseif ($shippingMethod == 'smartsendpickup_pickup') {
-            $pickup['store'] = $pickup_t['store']['smartsendpickup_pickup'];
         }
 
-        $quote_id = $quote->getId();
-        $data = array($quote_id => $pickup);
-
         if ($pickup) {
-            Mage::getSingleton('checkout/session')->setPickup($data);                //setting pickup
+            $data = array($quote_id => $pickup);
+            Mage::getSingleton('checkout/session')->setPickup($data);
+        }
+
+		/* Save data about flex delivery */
+        if ($carrier == 'smartsendpostdanmark' || $carrier == 'smartsendposten') {
+            $flex = array();
+            $flex_t = $request->getParam('shipping_flex', false);
+            $flex['store'] = $flex_t['store'][$shippingMethod];
+            if ($flex) {
+                $data_flex = array($quote_id => $flex);
+                Mage::getSingleton('checkout/session')->setFlex($data_flex);
+            }
         }
     }
 
+    /**
+     *
+     * This function is called after order gets saved to database.
+     * Here we transfer our custom pickuppoint fields to the custom table smartsend_pickup
+     * Read more: http://excellencemagentoblog.com/blog/2011/10/06/magento-add-custom-fields-checkout-page/
+     *
+     * @param $evt
+     */
     public function saveOrderAfter($evt) {
-        $order = $evt->getOrder();                  //getting order
-        $quote = $evt->getQuote();
-        $quote_id = $quote->getId();
-        $pickup = Mage::getSingleton('checkout/session')->getPickup();         //getting picup
-        $shippingMethod = $quote->getShippingAddress()->getShippingMethod(); //getting shipping method
+        $order 			= $evt->getOrder();										//getting order
+        $quote 			= $evt->getQuote();
+        $quote_id 		= $quote->getId();
+        $shippingMethod = $quote->getShippingAddress()->getShippingMethod();	//getting shipping method
+
+		$pickup 		= Mage::getSingleton('checkout/session')->getPickup();	//getting picup
+        $flex 			= Mage::getSingleton('checkout/session')->getFlex();	//getting flex
 
         if (isset($pickup[$quote_id])) {
 
-            $temp = $pickup[$quote_id];
-            $store = unserialize($temp['store']);
-            if ($shippingMethod == 'smartsendswipbox_pickup') {
-                $pickupModel = Mage::getModel('logistics/swipbox');
-                $data['pick_up_id'] = $store['pick_up_id'];
-            } elseif ($shippingMethod == 'smartsendpostdanmark_pickup') {
+            $temp 	= $pickup[$quote_id];
+            $store 	= unserialize($temp['store']);
+            if ($shippingMethod == 'smartsendpostdanmark_pickup') {
                 $pickupModel = Mage::getModel('logistics/postdanmark');
                 $data['pick_up_id'] = $store['pick_up_id'];
             } elseif ($shippingMethod == 'smartsendposten_pickup') {
@@ -79,57 +96,59 @@ class Smartsend_Logistics_Model_Observer extends Varien_Object {
             } elseif ($shippingMethod == 'smartsendbring_pickup') {
                 $pickupModel = Mage::getModel('logistics/bring');
                 $data['pick_up_id'] = $store['pick_up_id'];
-            } elseif ($shippingMethod == 'smartsendpickup_pickup') {
-                $pickupModel = Mage::getModel('logistics/pickup');
-                $data['pick_up_id'] = $store['pick_up_id'];
             }
 
-            $data['store'] = Mage::app()->getStore()->getFrontendName();
-            $data['company'] = $store['company'];
-            $data['street'] = $store['street'];
-            $data['city'] = $store['city'];
-            $data['zip'] = $store['zipcode'];
-            $data['country'] = $store['country'];
-            $data['carrier'] = $store['shippingMethod'];
-            $data['order_id'] = $order->getId();
+            $data['store'] 		= Mage::app()->getStore()->getFrontendName();
+            $data['company'] 	= $store['company'];
+            $data['street'] 	= $store['street'];
+            $data['city'] 		= $store['city'];
+            $data['zip'] 		= $store['zipcode'];
+            $data['country'] 	= $store['country'];
+            $data['carrier'] 	= $store['shippingMethod'];
+            $data['order_id'] 	= $order->getId();
 
-            if (isset($pickupModel)) {
-                $pickupModel->setData($data);
-                $pickupModel->save();
-            }
-        } elseif(strstr($shippingMethod,"smartsend")!="") {
-            
-            $carrier_name=explode("_",$shippingMethod);
-            $carrier = substr($carrier_name[0], 9);
-
-            $pickupModel = Mage::getModel('logistics/'.$carrier);
-            $data['carrier'] = ucfirst($carrier);
-            $data['pick_up_id'] = '000';
-
-            $data['store'] = Mage::app()->getStore()->getFrontendName();
-            $data['company'] = '';
-            $data['street'] = '';
-            $data['city'] = '';
-            $data['zip'] = '';
-            $data['country'] = 'DK';
-            $data['order_id'] = $order->getId();
-
-            if (isset($pickupModel)) {
+            if (isset($pickupModel) && !empty($store)) {
                 $pickupModel->setData($data);
                 $pickupModel->save();
             }
         }
+
+        if (isset($flex[$quote_id])) {
+
+            $temp 		= $flex[$quote_id];
+            $flexModel 	= Mage::getModel('logistics/flex');
+
+            $flexnote 			= $temp['store'];
+            $data['store'] 		= Mage::app()->getStore()->getFrontendName();
+            $data['flexnote'] 	= $flexnote;
+            $data['order_id'] 	= $order->getId();
+
+            if (isset($flexModel) && !empty($flexnote)) {
+                $flexModel->setData($data);
+                $flexModel->save();
+            }
+        }
     }
 
+    /**
+     *
+     * This function is called when $order->load() is done.
+     * Here we read our custom fields value from database and set it in order object.
+     * Read more: http://excellencemagentoblog.com/blog/2011/10/06/magento-add-custom-fields-checkout-page/
+     *
+     * @param unknown_type $evt
+     */
     public function loadOrderAfter($evt) {
+    	/*
         $order = $evt->getOrder();
         if ($order->getId()) {
             $order_id = $order->getId();
             $pickupCollection = Mage::getModel('logistics/pickup')->getCollection();          //get pickup collection from the pickup table
             $pickupCollection->addFieldToFilter('order_id', $order_id);
             $pickup = $pickupCollection->getFirstItem();
-            $order->setPickupObject($pickup);
+            $order->setPickupObject($pickup); //setPickupObject() is not set anywhere
         }
+        */
     }
 
     public function loadQuoteAfter($evt) {
@@ -168,7 +187,7 @@ class Smartsend_Logistics_Model_Observer extends Varien_Object {
 			$message = Mage::helper('sales')->__('Are you sure you want to do this?');
 			$block->addButton('generate_label', array(
 				'label'     => Mage::helper('sales')->__('Generate label'),
-				'onclick'   => "setLocation('{$block->getUrl('logistics/logistics/label')}')",//if message use: "confirmSetLocation('{$message}', '{$block->getUrl('*/yourmodule/crazy')}')",
+				'onclick'   => "setLocation('{$block->getUrl('*/logistics/labelNormal')}')",//if message use: "confirmSetLocation('{$message}', '{$block->getUrl('*/yourmodule/crazy')}')",
 				'class'     => 'go'
 			));
 		}
@@ -183,15 +202,52 @@ class Smartsend_Logistics_Model_Observer extends Varien_Object {
 			// Add 'generate label' action
 			$block->addItem('mass_generate_label', array(
 				'label' => Mage::helper('sales')->__('Generate label'),
-				'url' => $block->getUrl('logistics/logistics/labelMass')
+				'url' => $block->getUrl('*/logistics/labelNormalMass')
 			));
 			
 			// Add 'generate return label' action
 			$block->addItem('mass_generate_return_label', array(
 				'label' => Mage::helper('sales')->__('Generate return label'),
-				'url' => $block->getUrl('logistics/logistics/labelreturnMass')
+				'url' => $block->getUrl('*/logistics/labelReturnMass')
+			));
+			
+			// Add 'generate normal + return label' action
+			$block->addItem('mass_generate_normal_return_label', array(
+				'label' => Mage::helper('sales')->__('Generate normal and return label'),
+				'url' => $block->getUrl('*/logistics/labelNormalReturnMass')
 			));
 		}
 	}
+        
+    public function changedSectionBefore($observer) {
+
+        $username = Mage::getStoreConfig('carriers/smartsend/username');
+        $licensekey = Mage::getStoreConfig('carriers/smartsend/licensekey');
+        $validation = (int) Mage::getStoreConfig('carriers/smartsend/validation');
+
+        $changedusername = Mage::app()->getRequest()->getParams()['groups']['smartsend']['fields']['username']['value'];
+        $changedlicensekey = Mage::app()->getRequest()->getParams()['groups']['smartsend']['fields']['licensekey']['value'];
+
+        if ($username != $changedusername || $licensekey != $changedlicensekey || $validation + 60*60*24*7 < time() ) {
+            $is_verified = Mage::getModel('logistics/api_validation')->_verify($changedusername, $changedlicensekey);
+            if ($is_verified) {
+                $validation = time();
+            } else {
+                $validation = 0;
+            }
+        }
+        Mage::getConfig()->saveConfig('carriers/smartsend/validation', $validation, 'default', 0);
+    }
+
+    public function changedSection($observer) {
+	/*
+        $status = Mage::app()->getRequest()->getParam('status');
+
+        if (isset($status)) {
+            Mage::getConfig()->saveConfig('carriers/smartsend/validation', $status, 'default', 0);
+        }
+    */
+    }
+
 
 }

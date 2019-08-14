@@ -17,17 +17,16 @@
  * versions in the future. If you wish to customize the plugin for your
  * needs please refer to http://www.smartsend.dk
  *
- * @folder		/app/code/community/Smartsend/Logistics/Model/Pickup.php
+ * @folder		/app/code/community/Smartsend/Logistics/Model/Flex.php
  * @category	Smartsend
  * @package		Smartsend_Logistics
  * @author		Anders Bilfeldt
  * @url			www.smartsend.dk
  */
-class Smartsend_Logistics_Model_Pickup extends Mage_Core_Model_Abstract {
+class Smartsend_Logistics_Model_Flex extends Mage_Core_Model_Abstract {
 
     public function _construct() {
         parent::_construct();
-        $this->_init('logistics/pickup');
+        $this->_init('logistics/flex');
     }
-
 }

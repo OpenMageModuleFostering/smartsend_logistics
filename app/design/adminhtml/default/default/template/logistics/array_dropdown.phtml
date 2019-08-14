@@ -65,6 +65,11 @@ $_colspan = $_colspan > 1 ? 'colspan="' . $_colspan . '"' : '';
         <span><?php echo $this->_addButtonLabel ?></span>
     </button>
 </div>
+<div>
+	<span><?php echo '<i>'.$this->_columns['orderminprice']['label'].'</i>: '.Mage::helper('logistics')->__( 'Input the order price' ).' <b>'. Mage::helper('logistics')->__( 'excluding tax' ) .'</b> '?></span></br>
+	<span><?php echo '<i>'.$this->_columns['ordermaxprice']['label'].'</i>: '.Mage::helper('logistics')->__( 'Input the order price' ).' <b>'. Mage::helper('logistics')->__( 'excluding tax' ) .'</b> ' ?></span></br>
+	<span><?php echo '<i>'.$this->_columns['pickupshippingfee']['label'].'</i>: '.Mage::helper('logistics')->__( 'Input the shipping fee' ).' <b>'.( (bool)Mage::getStoreConfig('tax/calculation/shipping_includes_tax') ? Mage::helper('logistics')->__( 'including tax' ) : Mage::helper('logistics')->__( 'excluding tax' ) ).'</b> '; ?></span>
+</div>
 
 <script type="text/javascript">
     
@@ -177,4 +182,36 @@ arrayRow<?php echo $_htmlId ?>.showButtonOnly();
 toggleValueElements({checked:true}, $('grid<?php echo $_htmlId ?>').parentNode);
 <?php endif;?>
 //]]>
+</script>
+
+<style type="text/css">
+    #row_carriers_smartsend_validation .value input.input-text{
+        background: none repeat scroll 0 0 rgba(0, 0, 0, 0) !important;
+        border: none;
+    }
+</style>
+<script type="text/javascript">
+    document.getElementById('carriers_smartsend_validation').disabled=true;    
+    if(document.getElementById('carriers_smartsend_validation').value === 0 || document.getElementById('carriers_smartsend_validation').value === '0' || document.getElementById('carriers_smartsend_validation').value === '') {
+    	document.getElementById('carriers_smartsend_validation').value = '<?php echo Mage::helper('logistics')->__( 'Please enter valid user information' ); ?>';
+		document.getElementById('carriers_smartsend_validation').style.color = "red";
+    } else if(document.getElementById('carriers_smartsend_validation').value != '<?php echo Mage::helper('logistics')->__( 'Please enter valid user information' ); ?>' 
+    	&& document.getElementById('carriers_smartsend_validation').value != '<?php echo Mage::helper('logistics')->__( 'Save settings to validate' ); ?>'
+    	&& document.getElementById('carriers_smartsend_validation').value != '<?php echo Mage::helper('logistics')->__( 'Valid user information' ); ?>') {
+			
+			var date = new Date();
+			var timestamp = date.getTime();
+			var week = (60*60*24*7);
+			
+			if(parseInt(document.getElementById('carriers_smartsend_validation').value) + week > timestamp/1000) {
+				document.getElementById('carriers_smartsend_validation').value = '<?php echo Mage::helper('logistics')->__( 'Valid user information' ); ?>';
+				document.getElementById('carriers_smartsend_validation').style.color = "green";	
+			} else {
+				document.getElementById('carriers_smartsend_validation').value = '<?php echo Mage::helper('logistics')->__( 'Save settings to validate' ); ?>';
+				document.getElementById('carriers_smartsend_validation').style.color = "orange";
+			}
+    } else {
+    	document.getElementById('carriers_smartsend_validation').value = '<?php echo Mage::helper('logistics')->__( 'Please enter valid user information' ); ?>';
+		document.getElementById('carriers_smartsend_validation').style.color = "red";
+    }
 </script>

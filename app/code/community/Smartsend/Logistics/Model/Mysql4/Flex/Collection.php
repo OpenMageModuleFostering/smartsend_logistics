@@ -17,20 +17,18 @@
  * versions in the future. If you wish to customize the plugin for your
  * needs please refer to http://www.smartsend.dk
  *
- * @folder		/app/code/community/Smartsend/Logistics/Model/System/Pickup/Size.php
+ * @folder		/app/code/community/Smartsend/Logistics/Model/Mysql4/Flex/Collection.php
  * @category	Smartsend
  * @package		Smartsend_Logistics
  * @author		Anders Bilfeldt
  * @url			www.smartsend.dk
  */
 
-class Smartsend_Logistics_Model_System_Size extends Mage_Core_Model_Config_Data {
-
-    public function toOptionArray() {
-        $opt[] = array('value' => 0, 'label' => Mage::helper('adminhtml')->__("Small"));
-        $opt[] = array('value' => 1, 'label' => Mage::helper('adminhtml')->__("Medium"));
-        $opt[] = array('value' => 2, 'label' => Mage::helper('adminhtml')->__("Large"));
-        return $opt;
+class Smartsend_Logistics_Model_Mysql4_Flex_Collection extends Mage_Core_Model_Mysql4_Collection_Abstract
+{
+    public function _construct()
+    {
+        parent::_construct();
+        $this->_init('logistics/flex');
     }
-
 }

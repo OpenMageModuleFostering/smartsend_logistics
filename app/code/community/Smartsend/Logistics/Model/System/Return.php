@@ -27,11 +27,11 @@
 class Smartsend_Logistics_Model_System_Return extends Mage_Core_Model_Config_Data {
 
     public function toOptionArray() {                 //address list format for the admin system config
-    	$opt[] = array('value' => '', 'label' => Mage::helper('adminhtml')->__("Same carrier"));
-        $opt[] = array('value' => 'smartsendpostdanmark_private', 'label' => Mage::helper('adminhtml')->__("Post Danmark"));
-        $opt[] = array('value' => 'smartsendgls_private', 'label' => Mage::helper('adminhtml')->__("GLS"));
-        $opt[] = array('value' => 'smartsendbring_private', 'label' => Mage::helper('adminhtml')->__("Bring"));
-        $opt[] = array('value' => 'smartsendposten_private', 'label' => Mage::helper('adminhtml')->__("Posten"));
+    	$opt[] = array('value' => '', 'label' => Mage::helper('logistics')->__("Same carrier"));
+        $opt[] = array('value' => 'smartsendpostdanmark_private', 'label' => Mage::helper('logistics')->__("Post Danmark"));
+        $opt[] = array('value' => 'smartsendgls_private', 'label' => Mage::helper('logistics')->__("GLS"));
+        $opt[] = array('value' => 'smartsendbring_private', 'label' => Mage::helper('logistics')->__("Bring"));
+        $opt[] = array('value' => 'smartsendposten_private', 'label' => Mage::helper('logistics')->__("Posten"));
         return $opt;
     }
 

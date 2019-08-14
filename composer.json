@@ -3,7 +3,7 @@
     "type": "magento-module",
     "license": "GPL",
     "homepage": "",
-    "description": "Shipping methods for Post Danmark, GLS, Bring, SwipBox and Posten.",
+    "description": "Table rate shipping methods with flexible conditions determining the rate and even let the customer chose a pick-up point during checkout. Integrates the shipping methods directly with carrier systems and create PDF labels directly from the backend.",
     "authors": [
     {
         "name": "Smart Send ApS",

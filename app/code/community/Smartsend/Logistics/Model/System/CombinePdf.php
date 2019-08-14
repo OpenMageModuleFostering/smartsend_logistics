@@ -26,9 +26,9 @@
 
 class Smartsend_Logistics_Model_System_CombinePdf extends Mage_Core_Model_Config_Data {
 
-    public function toOptionArray() {                //Cheapest   or  Most Expensive method
-        $opt[] = array('value' => 0, 'label' => Mage::helper('adminhtml')->__("Seperate pdf's"));
-        $opt[] = array('value' => 1, 'label' => Mage::helper('adminhtml')->__("Combine pdf's into one file"));
+    public function toOptionArray() {
+        $opt[] = array('value' => 1, 'label' => Mage::helper('logistics')->__("Merged PDF file"));
+        $opt[] = array('value' => 0, 'label' => Mage::helper('logistics')->__("Separate PDF files"));
         return $opt;
     }
 

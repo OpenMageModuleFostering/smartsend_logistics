@@ -1,5 +1,3 @@
-<?php
-
 /**
  * Smartsend_Logistics
  *
@@ -17,18 +15,30 @@
  * versions in the future. If you wish to customize the plugin for your
  * needs please refer to http://www.smartsend.dk
  *
- * @folder		/app/code/community/Smartsend/Logistics/Model/Mysql4/Swipbox.php
+ * @folder		/skin/frontend/base/default/js/logistics.js
  * @category	Smartsend
  * @package		Smartsend_Logistics
  * @author		Anders Bilfeldt
  * @url			www.smartsend.dk
  */
 
-class Smartsend_Logistics_Model_Mysql4_Swipbox extends Mage_Core_Model_Mysql4_Abstract
-{
-    public function _construct()
-    {    
-        // Note that the pickup_id refers to the key field in your database table.
-        $this->_init('logistics/swipbox', 'id');
+
+function showShipping(code, id) {
+    hideShippingAll();
+
+    if (jQuery('#' + id).is(':checked')) {
+        if (jQuery('#' + 'shipping_form_' + code).length != 0) {
+            jQuery('#' + 'shipping_form_' + code).show();
+            jQuery('#' + id).find('.required-entry').attr('disabled', 'false');
+        }
     }
 }
+function hideShippingAll() {
+    jQuery('input[type="radio"][name="shipping_method"]').each(function() {
+        var code = jQuery(this).val();
+
+        jQuery('#' + 'shipping_form_' + code).hide();
+        jQuery(this).find('.required-entry').attr('disabled', 'true');
+    });
+}
+

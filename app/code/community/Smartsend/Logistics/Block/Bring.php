@@ -30,74 +30,24 @@ class Smartsend_Logistics_Block_Bring extends Mage_Checkout_Block_Onepage_Shippi
     }
 
     public function getPickupData() {
-        $checkOut = Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress();   //getting shipping address from checkout quote
-        $street = $checkOut->getStreet();
-        $street = implode(' ', $street);           // splitting the street by " "(space)
-        $city = $checkOut->getCity();
-        $postcode = $checkOut->getPostcode();
-        $country = $checkOut->getCountry();
-        $result = Mage::getSingleton('logistics/carrier_bring')->_post($street, $city, $postcode, $country);   // get the pickup points for the bring carrier
+        $checkOut 	= Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress();         //getting shipping address from checkout quote
+        
+        $street 	= $checkOut->getStreet();
+        $street 	= implode(' ', $street);             // splitting the street by " "(space)
+        $city 		= $checkOut->getCity();
+        $postcode 	= $checkOut->getPostcode();
+        $country 	= $checkOut->getCountry();
+        $carriers 	= 'bring';
 
-        $output = json_decode($result->response, true);        // decoding the pickup points data into array 
-        if (!$output) {                                       // if no pickup data return false
-            return FALSE;
-        }
-        $servicePoints = $output;
+        $pickup = Mage::getModel('logistics/api_pickups');
+        
+        $pickup->_post($street, $city, $postcode, $country,$carriers);        // get the pickup points for the postdanmark carrier
 
-        $format = Mage::getStoreConfig('carriers/smartsendbring/listformat');    //get the address format from the admin system config
-        for ($i = 0; $i < count($servicePoints); $i++) {
-            if (!isset($servicePoints[$i])) {
-                break;
-            }
-            $addressData = $this->getaddressData($servicePoints[$i]);   //getting address data form the pickup points response 
-            switch ($format) {
-                case 1:
-                    $resultData[$addressData['servicePointId']] = array(
-                        'company' => $addressData['company'],
-                        'street' => $addressData['street'],
-                        'zip_code' => $addressData['zipcode'],
-                        'city' => $addressData['city']
-                    );
-                    break;
-                case 2:
-                    $resultData[$addressData['servicePointId']] = array(
-                        'company' => $addressData['company'],
-                        'street' => $addressData['street'],
-                        'zipcode' => $addressData['zipcode']
-                    );
-                    break;
-                case 3:
-                    $resultData[$addressData['servicePointId']] = array(
-                        'company' => $addressData['company'],
-                        'street' => $addressData['street'],
-                        'city' => $addressData['city']
-                    );
-                default:
-                    $resultData[$addressData['servicePointId']] = array(
-                        'company' => $addressData['company'],
-                        'street' => $addressData['street'],
-                    );
-                    break;
-            }
-        }
-        if (!isset($resultData)) {
-            $resultData = "";
-        }
-        return $resultData;
-    }
-
-    protected function getaddressData($servicePoint) {
-        $data['pick_up_id'] = $servicePoint['pickupid'];
-        $data['company'] = implode(" ", array_filter(array($servicePoint['name1'], $servicePoint['name2']))); //joining the address data 
-        $data['city'] = $servicePoint['city'];
-        $data['street'] = implode(" ", array_filter(array($servicePoint['address1'], $servicePoint['address2'])));
-        $data['zipcode'] = $servicePoint['zip'];
-        $data['shippingMethod'] = $servicePoint['carrier'];
-        $data['country'] = $servicePoint['country'];
-        $ser = serialize($data);
-        $data['servicePointId'] = $ser;
-     
-        return $data;
+		if($pickup->getPickupPoints() != false) {
+			return $pickup->getPickupPoints();
+		} else {
+			return false;
+		}
     }
 
 }

@@ -1,95 +1,150 @@
-Username, Brugernavn
-Licencekey, Licenskode
-Combine PDF files?, Kombiner PDF filer?
-Seperate pdf's, Opdel PDF'er
-Combine pdf's into one file, Saml PDF filer til én
-Method, Metode
-Min Price,Min pris
-Max Price,Maks pris
-Min Weight,Min vægt
-Max Weight,Maks vægt
-Shipping Fee,Fragt pris
-Countries, Lande
-Add Rate,Tilføj Rate
-Enabled,Aktiveret
-Disabled,Deaktiveret
-Delete,Slet
-the order confirmation email was sent,ordrebekræftelses e-mail blev sendt
-the order confirmation email was not sent,ordrebekræftelses e-mail blev ikke sendt
-Order Date,Ordre dato
-Order Status,Ordrestatus
-Purchased From,Indkøbt fra
-Link to the New Order,Link til den nye orden
-Link to the Previous Order,Link til den tidligere ordre
-Placed from IP,Placeret fra IP
-Account Information,Kontooplysninger
-Customer Name,Kundenavn
-Email,Email
-Email notification,Email notifikation
-SMS notification,SMS notifikation
-Pre-notification,Pre-notifikation
-Return,Retur
-Return methode,Retur metode
-Which carrier should handle return packages?,Hvilket fragtfirma skal håndtere returpakker?
-Customer Group,Customer Group
-Billing Address,Faktureringsadresse
-Shipping Address,Leveringsadresse
-Smart Send Pickup Address,Smart Send Afhentningsadresse
-Pickup Point Id: ,Afhentnings ID:
-Shipping Method: ,Forsendelses Metode:
-Record not found,Optag ikke fundet
-Choose Store Location:,Vælg afhentningssted:
-Select Store..,Vælg afhentningssted..
-"Sorry, no quotes are available for this order at this time.","Beklager, ingen fragtpris er til rådighed for denne ordre på nuværende tidspunkt."
-Incl. Tax,Inkl. Moms
-Title,Titel
-Carrier Title,Titel på fragtfirma
-Method Name,Metode navn
-Consumer ID,Forbruger ID
-Price,Pris
-Cheapest or most expensive?,Billigste eller dyreste?
-Cheapest, Billigste
-Most Expensive, Dyreste
-PDF file, PDF fil
-Yes, Ja
-No, Nej
-Displayed Error Message,Vist fejlmeddelelse
-Timeout,Timeout
-Number Of Results,Antal resultater
-Dropdown format,Dropdown format
-"This shipping method is currently unavailable.####### If you would like to ship using this shipping method, please contact us.","Denne forsendelsesmetode er ikke tilgængelig i øjeblikket . ####### Hvis du ønsker at sende ved hjælp af denne forsendelsesmetode , så kontakt os."
-Closest Pickup,Nærmeste afhentningssted
-Small,Lille
-Medium,Medium
-Large,Stor
-Delivered to closest pickup point, Leveres til nærmeste afhentningssted
-Username and licencekey must be entered in settings, Brugernavn og licenskode skal indtastes i indstillingerne før brug
-Unknown carrier, Ukendt fragtmetode
-No orders selected, Ingen ordre valgt
-Method not yet implemented, Metoden er ikke implementeret endnu
-Trying to send empty order array, Prøver at sende et tomt order array
-An error occurred while sending order, En fejl opstod mens ordren blev sendt
-Response, Svar
-Unknown status, Ukendt status
-Unknown content type, Ukendt indholds format
-Had shipments, Havde forsendelser
-Unknown pickup method, Ukendt pickup metode
-Unable to fetch pickup data, Kunne ikke læse data om pickup
-Not a pickup shipping method, Ikke en pickup forsendelsesmetode
-Unsupported carrier, Ikke understøttet fragtfirma
-Unsupported shipping method, Ikke understøttet forsendelses metode
-Unknown carrier, Ukendt fragtfirma
-Unknown carrier when adding services, Ukendt fragtfirma ved tilføjelse af service
-Generate label, Lav label
-Generate return label, Lav retur label,
-How the dropdown is formatted, Formatet af dropdown listen
-Carrier is excluded from TAX even though there is a Shipping Tax defined, Der udregnes ikke moms af fragten selvom der er defineret en moms for fragt
-Order has no shipments without trace code and cannot be shipped, Ordren har ikke en forsendelse uden track&trace kode
-Failed to insert tracecode, Kunne ikke indsætte track and trace kode
-Unable to determine carrier for pickup shipping method, Kunne ikke bestemme fragtfirma for pickup forsendelsesmetode
-No items that could be shipped, Ingen produkter kunne sendes
-Shipping to closest pickup point, Sendes til nærmeste afhentningssted
-"Either just an id or a semicolon separated list of 'country,id' (* is all countries). Eg: SE,123;NO,321;*,44", "Enten blot et id eller en semikolon separeret liste af 'land,id' (* er all lande). Fx: SE,123;NO,321;*,44"
-No parcels without trace code, Ingen forsendelser uden tracking nummer
-No unshipped items, Ingen usendte varer
-No parcels to ship, Ingen varer kan sendes
+"Username","Brugernavn"
+"License key","Licensnøgle"
+"Validation","Validering"
+"Valid user information","Gyldig bruger"
+"Please enter valid user information","Indtast venligt gyldig bruger-information"
+"Save settings to validate","Gem indstillingerne for at validere"
+"Merge labels from multiple orders","Sammensæt PDF-labels fra flere ordre"
+"Separate PDF files","Seperate PDF-filer"
+"Merged PDF file","Sammensat PDF-fil"
+"Generate PDF file containing all labels or create a single PDF file for each order","Generer PDF indeholdende alle fragtlabels eller generer én PDF-fil for hver ordre"
+"Dropdown format","Dropdown-format"
+"How the pickup points are listed during checkout","Hvordan listen af afhentningssteder vises i checkout"
+"Set order status after label print","Ændre ordre-status efter label-generering"
+"Company","Firma"
+"City","By"
+"Street","Adresse"
+"Zipcode","Postnummer"
+"Don't change order status","Ændre ikke ordre-status"
+"Send shipment email","Send forsendelses-email"
+"Send system shipment email to the customer after generating label","Afsend forsendelses-email fra systemet efter genering af label"
+"Enabled","Aktiveret"
+"Carrier title","Titel på fragtfirma"
+"Carrier title shown in frontend at customer checkout","Titel på fragtfirma som vises til kunden under checkout"
+"Table rate","Forsendelsestabel"
+"Handle multiple rates for same shipping method","Håndtering af fragtlinie-doubletter"
+"Shipping method","Fragtmetode"
+"Min. price","Min. pris"
+"Max. price","Maks pris"
+"Min. weight","Min. vægt"
+"Max. weight","Maks vægt"
+"Shipping fee","Fragtpris"
+"Countries","Lande"
+"Title","Titel"
+"Add rate","Tilføj rate"
+"Countries can be entered as a comma-separated list in ISO 3166-1 alpha-2 format. Use * for all valid countries.","Lande kan indtastes som en komma-separeret liste i ISO-3166-1 alpha-2 format. Brug * for alle gyldige lande."
+"Cheapest","Billigste"
+"Most expensive","Dyreste"
+"If multiple rates are valid for the same method, use either the cheapest or the most expensive rate","Hvis flere fragtlinier er gyldig for samme fragtmetode, benyt da enten den billigste eller dyreste fragtpris"
+"Exclude from TAX","Momsfritag"
+"Excluded private shipping methods to Denmark from TAX","Momsfritag forsendelsesmetoder til privatpersoner i Danmark"
+"Services","Tillægsydelser"
+"Email notification", "Email-notifikation"
+"Send an email to the customer with info about delivery","Send en email til kunden med information om forsendelsen"
+"SMS notification","SMS-notifikation"
+"Send a SMS to the customer with info about delivery","Send en SMS til kunden med information om forsendelsen"
+"Pre-notification","Pre-notifikation"
+"Pre-notification receiver","Pre-notifikations modtager"
+"Leave blank if receiver should be the user","Efterlad blank hvis modtageren skal være brugeren"
+"Pre-notification sender","Pre-notifikations afsender"
+"Pre-notification message","Pre-notifikations besked"
+"Send and email with info about delivery at soon as a label is created","Send en email med informationer om forsendelsen så snart en pakkelabel bliver lavet"
+"Label format","Labelformat"
+"Pacsoft link","Pacsoft-link"
+"PDF file","PDF-fil"
+"Pacsoft QuickID","Pacsoft QuickID"
+"ID of the Pacsoft sender appearing on the label","ID på den Pacsoft afsender der er synlig på pakkelabel"
+"Waybill ID","Waybill-ID"
+"Either just an id or a semicolon separated list of 'country,id' (* is all countries). Eg: SE,123;NO,321;*,44", "Indtast enten et ID eller en semikolon-separeret liste af typen 'land,id' (* angiver alle lande). Fx. SE,123;NO,321;*,44"
+"Flex delivery","Flexlevering"
+"Enable flex delivery for the selected shipping methods","Aktiver flexlevering for de valgte fragtmetoder"
+"Return","Returfragt"
+"Return method","Retur-fragtfirma"
+"Determines what carrier handles return packages","Angivet hvilket fragtfirma der håndterer retur-pakker"
+"Same carrier","Samme fragtfirma"
+"Delete","Slet"
+"Yes","Ja"
+"No","Nej"
+"Include order comment on label","Påsæt ordrekommentar på pakkelabel"
+"<div class=""smartsend""><p style=""background: #FFFFFF;border: 1px solid orange;font-weight: bold; padding: 20px"">If you don't have a Smart Send subscription please create one at our website: <a href=""http://www.smartsend.dk/signup"" target=""_blank"">Smart Send</a></p></div>","<div class=""smartsend""><p style=""background: #FFFFFF;border: 1px solid orange;font-weight: bold; padding: 20px"">Hvis du ikke har et abonnement hos Smart Send, opret da et på vores hjemmeside: <a href=""http://www.smartsend.dk/signup"" target=""_blank"">Smart Send</a></p></div>"
+"<div class=""smartsend""><p style=""background: #FFFFFF;border: 1px solid orange;font-weight: bold; padding: 20px"">This shipping method may only be used if a valid Smart Send license is purchased. Please see <a href=""http://www.smartsend.dk"" target=""_blank"">Smart Send</a> for further information.</p></div>","<div class=""smartsend""><p style=""background: #FFFFFF;border: 1px solid orange;font-weight: bold; padding: 20px"">Denne forsendelsesmetode må kun benyttes med en gyldig Smart Send licens. Se venligst <a href=""http://www.smartsend.dk"" target=""_blank"">Smart Send</a> for nærmere information.</p></div>"
+"Input the order price","Indtast ordrens samlede pris"
+"Input the shipping fee","Indtast fragtprisen"
+"including tax","inklusiv moms"
+"excluding tax","eksklusiv moms"
+
+"Pickuppoint","Afhentningssted"
+"Private to home","Privatpakke med omdeling"
+"Commercial","Erhvervspakke"
+"Private","Privatpakke uden omdeling"
+"DPD Classic","DPD Classic"
+"DPD Guarantee","DPD Garantipakke"
+"Value mail","Varebrev"
+"Value mail first class","Varebrev første klasse"
+"Value mail economy","VarReturn methodebrev økonomi"
+"Maxi mail","Stort brev"
+"Commercial Bulksplit","Erhverv Bulksplit"
+"Private Bulksplit","Privatpakke uden omdeling Bulksplit"
+"Private to home Bulksplit","Privatpakke med omdeling Bulksplit"
+"Private collective","Privat samsending"
+"Private priority","Privatpakke prioritet"
+"Private economy","Privatpakke økonomi"
+"Service Logistics","Service Logistik"
+"Express","Express"
+"Mini parcel","Minipakke"
+"Commercial priority","Erhvervspakke prioritet"
+
+"Generate label","Opret label"
+"Generate return label","Opret retur label"
+"Generate normal and return label","Opret almindelig og retur label"
+
+"Order","Order"
+"Download combined PDF label","Hent samlet PDF-label"
+"Link to print labels","Link til print af labels"
+"Download PDF label","Hent PDF-label"
+"Link to print label","Link til print af label"
+"Label generated with Smart Send Logistics","Label genereret via Smart Send Logistics"
+"Tracecode","Trackingnummer"
+"Unknown API method","Ukendt API-metode"
+"Trying to send empty order array","Forsøger at sende et tomt order array"
+"Error from server","Serverfejl"
+"No orders returned from server","Ingen ordre returneret fra server"
+"No parcels returned from server","Ingen forsendelser returneret fra serveren"
+"Unknown order was returned from server","Ukendt order returneret fra server"
+"No PDF file or link returned from server","Ingen PDF-fil eller link til udskrift tilgængeligt"
+"Failed to insert tracecode. No tracecode available.","Fejl under indsættese af trackingnummer. Trackingnummer er ikke tilgængeligt."
+"Failed to change order status. Status unchanged.","Fejl ved opdatering af ordrestatus. Ordrestatus er ikke opdateret."
+"Failed to send shipment mail. No mail sent.","Fejl ved udsendelse af forsendelsemail. Forsendelsesmail blev ikke udsendt."
+"Failed to add order comment","Fejl ved opdatering af ordrehistorikken"
+"Please enter a username in the modules settings","Indtast venligst et brugernavn i modulets indstillinger"
+"Please enter a license key in the modules settings","Indtast venligst en licenskode i modulets indstillinger"
+
+"Unable to determine the shipping method used for return parcels","Kunne ikke bestemme forsendelsesmetoden til returpakker"
+"Unable to determine the shipping carrier","Kunne ikke bestemme fragtfirmaet"
+"Unable to determine the shipping method","Kunne ikke bestemme fragtmetoden"
+"Unable to determine carrier for pickup shipping method","Kunne ikke bestemme fragtfirma for fragtmetode til afhentningssted"
+"Unsupported carrier","Ikke supporteret fragtmetode"
+"Unable to determine shipping method for carrier","Kunne ikke bestemme fragtmetoden for fragtfirmaet"
+"Unable to determine shipping carrier","Kunne ikke bestemme fragtfirmaet"
+"Unknown shipping carrier","Ukendt fragtmetode"
+"Unable to determine shipping method","Kunne ikke bestemme fragtmetoden"
+"All packages has been shipped. No parcels without trace code exists. Remove existing tracecodes to re-generate labels.","Alle pakker er allerede afsendt. Ingen pakker mangler trackingnummer. Fjern eksisterende trackingnumre for at lave nye labels."
+"No items to ship","Ingen produkter kan afsendes"
+"No parcels to ship","Ingen forsendelser at sende"
+"Trying to access pickup data for an order that is not a pickup point order","Kunne ikke hente data om afhentningssted for en ordre der er sendt med anden metode"
+
+"Pickuppoint","Afhentningssted"
+"ID","ID"
+"Shipping to closest pick-up point","Sendes til nærmeste afhentningssted"
+"Select a pick-up point","Vælg et afhentningssted"
+"Not a pickup point","Ikke et afhentningssted"
+"Select a flexdelivery option","Vælg en flexleverings mulighed"
+"Flexdelivery","Flexlevering"
+"Flexdelivery note","Flexleveringsnote"
+"Flexdelivery instruction not available","Flexleveringsinstruktion ikke valgt"
+"By the frontdoor","Foran hoveddøren"
+"By the carport","Ved carporten eller garagen"
+"By the back dor","Ved bagdøren"
+"I have Modtagerflex","Jeg har Modtagerflex"
+"Can be left unattended","Må stilles et andet sted"
+"Debug","Fejlfinding"

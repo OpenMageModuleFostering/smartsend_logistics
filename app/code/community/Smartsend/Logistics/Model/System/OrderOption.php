@@ -27,8 +27,8 @@
 class Smartsend_Logistics_Model_System_OrderOption extends Mage_Core_Model_Config_Data {
 
     public function toOptionArray() {                //Cheapest   or  Most Expensive method
-        $opt[] = array('value' => 0, 'label' => Mage::helper('adminhtml')->__("Cheapest"));
-        $opt[] = array('value' => 1, 'label' => Mage::helper('adminhtml')->__("Most Expensive"));
+        $opt[] = array('value' => 0, 'label' => Mage::helper('logistics')->__("Cheapest"));
+        $opt[] = array('value' => 1, 'label' => Mage::helper('logistics')->__("Most expensive"));
         return $opt;
     }
 

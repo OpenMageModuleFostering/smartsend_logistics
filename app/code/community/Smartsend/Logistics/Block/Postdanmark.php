@@ -30,73 +30,44 @@ class Smartsend_Logistics_Block_Postdanmark extends Mage_Checkout_Block_Onepage_
     }
 
     public function getPickupData() {
-        $checkOut = Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress();         //getting shipping address from checkout quote
-        $street = $checkOut->getStreet();
-        $street = implode(' ', $street);             // splitting the street by " "(space)
-        $city = $checkOut->getCity();
-        $postcode = $checkOut->getPostcode();
-        $country = $checkOut->getCountry();
-        $result = Mage::getSingleton('logistics/carrier_postdanmark')->_post($street, $city, $postcode, $country);           // get the pickup points for the postdanmark carrier
+        $checkOut 	= Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress();         //getting shipping address from checkout quote
+        
+        $street 	= $checkOut->getStreet();
+        $street 	= implode(' ', $street);             // splitting the street by " "(space)
+        $city 		= $checkOut->getCity();
+        $postcode 	= $checkOut->getPostcode();
+        $country 	= $checkOut->getCountry();
+        $carriers 	= 'postdanmark';
 
-        $output = json_decode($result->response, true);              // decoding the pickup points data into array 
-        if (!$output) {                                             // if no pickup data return false
-            return FALSE;
-        }
-        $servicePoints = $output;
+        $pickup = Mage::getModel('logistics/api_pickups');
 
-        $format = Mage::getStoreConfig('carriers/smartsendpostdanmark/listformat');            //get the address format from the admin system config
-        for ($i = 0; $i < count($servicePoints); $i++) {
-            if (!isset($servicePoints[$i])) {
-                break;
-            }
-            $addressData = $this->getaddressData($servicePoints[$i]);       //getting address data form the pickup points response 
-            switch ($format) {
-                case 1:
-                    $resultData[$addressData['servicePointId']] = array(
-                        'company' => $addressData['company'],
-                        'street' => $addressData['street'],
-                        'zip_code' => $addressData['zipcode'],
-                        'city' => $addressData['city']
-                    );
-                    break;
-                case 2:
-                    $resultData[$addressData['servicePointId']] = array(
-                        'company' => $addressData['company'],
-                        'street' => $addressData['street'],
-                        'zipcode' => $addressData['zipcode']
-                    );
-                    break;
-                case 3:
-                    $resultData[$addressData['servicePointId']] = array(
-                        'company' => $addressData['company'],
-                        'street' => $addressData['street'],
-                        'city' => $addressData['city']
-                    );
-                default:
-                    $resultData[$addressData['servicePointId']] = array(
-                        'company' => $addressData['company'],
-                        'street' => $addressData['street'],
-                    );
-                    break;
-            }
+        $pickup->_post($street, $city, $postcode, $country, $carriers);        // get the pickup points for the postdanmark carrier
+
+        if ($pickup->getPickupPoints() != false) {
+            return $pickup->getPickupPoints();
+        } else {
+            return false;
         }
-        if (!isset($resultData)) {
-            $resultData = "";
-        }
-        return $resultData;
     }
 
-    protected function getaddressData($servicePoint) {
-        $data['pick_up_id'] = $servicePoint['pickupid'];
-        $data['company'] = implode(" ", array_filter(array($servicePoint['name1'], $servicePoint['name2'])));          //joining the address data 
-        $data['city'] = $servicePoint['city'];
-        $data['street'] = implode(" ", array_filter(array($servicePoint['address1'], $servicePoint['address2'])));
-        $data['zipcode'] = $servicePoint['zip'];
-        $data['shippingMethod'] = $servicePoint['carrier'];
-        $data['country'] = $servicePoint['country'];
-        $ser = serialize($data);
-        $data['servicePointId'] = $ser;
-        return $data;
+    public function getFlexData($carrier) {
+
+        $array = array(
+        	$this->__('By the frontdoor')		=> $this->__('By the frontdoor'),
+        	$this->__('By the carport')			=> $this->__('By the carport'),
+        	$this->__('By the back dor')		=> $this->__('By the back dor'),
+        	$this->__('I have Modtagerflex')	=> $this->__('I have Modtagerflex'),
+        	$this->__('Can be left unattended')	=> $this->__('Can be left unattended')
+        	);
+        $array2 = array();
+        $flexShippingMethods = Mage::getStoreConfig('carriers/smartsendpostdanmark/flexdelivery');
+        $flexShippingMethods = explode(',', $flexShippingMethods);
+
+        if (in_array($carrier, $flexShippingMethods)) {
+            return $array;
+        } else {
+            return $array2;
+        }
     }
 
 }

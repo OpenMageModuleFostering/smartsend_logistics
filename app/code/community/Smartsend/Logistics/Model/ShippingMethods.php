@@ -17,7 +17,7 @@
  * versions in the future. If you wish to customize the plugin for your
  * needs please refer to http://www.smartsend.dk
  *
- * @folder		/app/code/community/Smartsend/Logistics/Model/Status.php
+ * @folder		/app/code/community/Smartsend/Logistics/Model/ShippingMethods.php
  * @category	Smartsend
  * @package		Smartsend_Logistics
  * @author		Anders Bilfeldt
@@ -25,198 +25,104 @@
  */
 class Smartsend_Logistics_Model_ShippingMethods extends Varien_Object {
 
+	/**
+     * Function to return an array of shipping methods for a given carrier
+     *
+     * @param string $carrier is the carrier id formatted as 'groups[$carrier]'
+     *
+     * @return array of shipping methods with key as id and value as translated name
+     */
     static public function getOptionArray($carrier) {
 
-
         $carrier_name = explode('groups[', $carrier);          //getting carrier name
-
         $carrier_name = explode(']', $carrier_name[1]);
-
         $carrier_name = $carrier_name[0];
 
-        if ($carrier_name == 'smartsendbring') {
+		return self::getShippingMethodByCarrier($carrier_name);
+		
+    }
+    
+    /**
+     * Function to return an array of shipping methods for a given carrier
+     *
+     * @param string $carrier_name is the id of the carrier
+     *
+     * @return array $shipping_methods of shipping methods with key as id and value as translated name
+     */
+    static public function getShippingMethodByCarrier($carrier_name) {
+    
+		switch ($carrier_name) {
+    		case 'smartsendbring':
+    			//All Bring shipping methods
+            	$shipping_methods = array(
+            		'pickup'				=> Mage::helper('logistics')->__('Pickuppoint'),
+            		'private'				=> Mage::helper('logistics')->__('Private'),
+            		'privatehome'			=> Mage::helper('logistics')->__('Private to home'),
+            		'commercial'			=> Mage::helper('logistics')->__('Commercial'),
+            		'commercial_bulksplit'	=> Mage::helper('logistics')->__('Commercial Bulksplit'),
+            		'private_bulksplit'		=> Mage::helper('logistics')->__('Private Bulksplit'),
+            		'privatehome_bulksplit'	=> Mage::helper('logistics')->__('Private to home Bulksplit'),
+            		'express'				=> Mage::helper('logistics')->__('Express'),
+            		'miniparcel'			=> Mage::helper('logistics')->__('Mini parcel'),
+            		);
+    			break;
+    		case 'smartsendpostdanmark':
+    			//All Post Danmark shipping methods
+            	$shipping_methods = array(
+            		'pickup'				=> Mage::helper('logistics')->__('Pickuppoint'),
+            		'private'				=> Mage::helper('logistics')->__('Private'),
+            		'privatehome'			=> Mage::helper('logistics')->__('Private to home'),
+            		'commercial'			=> Mage::helper('logistics')->__('Commercial'),
+            		'dpdclassic'			=> Mage::helper('logistics')->__('DPD Classic'),
+           			'dpdguarantee'			=> Mage::helper('logistics')->__('DPD Guarantee'),
+            		'valuemail'				=> Mage::helper('logistics')->__('Value mail'),
+            		'privatesamsending'		=> Mage::helper('logistics')->__('Private collective'),
+           		 	'privatepriority'		=> Mage::helper('logistics')->__('Private priority'),
+            		'privateeconomy'		=> Mage::helper('logistics')->__('Private economy'),
+            		'lastmile'				=> Mage::helper('logistics')->__('Service Logistics'),
+           			'businesspriority'		=> Mage::helper('logistics')->__('Commercial priority'),
+					);
+				// If vConnect is installed remove pickup as shipping method
+        		if(Mage::helper('logistics/data')->isVconnetEnabled() == true) {
+        			unset($shipping_methods['pickup']);
+        		}
+    			break;
+    		case 'smartsendposten':
+    			//All Posten shipping methods
+            	$shipping_methods = array(
+            		'pickup'				=> Mage::helper('logistics')->__('Pickuppoint'),
+            		'private'				=> Mage::helper('logistics')->__('Private'),
+            		'privatehome'			=> Mage::helper('logistics')->__('Private to home'),
+            		'commercial'			=> Mage::helper('logistics')->__('Commercial'),
+            		'valuemail'				=> Mage::helper('logistics')->__('Value mail'),
+            		'valuemailfirstclass'	=> Mage::helper('logistics')->__('Value mail first class'),
+            		'valuemaileconomy'		=> Mage::helper('logistics')->__('Value mail economy'),
+            		'maximail'				=> Mage::helper('logistics')->__('Maxi mail'),
+            		);
+            	// If vConnect is installed remove pickup as shipping method
+        		if(Mage::helper('logistics/data')->isVconnetEnabled() == true) {
+        			unset($shipping_methods['pickup']);
+        		}
+    			break;
+    		case 'smartsendgls':
+    			//All GLS shipping methods
+            	$shipping_methods = array(
+            		'pickup'				=> Mage::helper('logistics')->__('Pickuppoint'),
+            		'private'				=> Mage::helper('logistics')->__('Private'),
+            		'privatehome'			=> Mage::helper('logistics')->__('Private to home'),
+            		'commercial'			=> Mage::helper('logistics')->__('Commercial'),
+            		);
+    			break;
+    		default:
+    			$shipping_methods = array();
+    			break;
+    	}
 
-			//Bring shipping methods
-            $shipping_methods = array(
-            	'private',
-            	'privatehome',
-            	'commercial',
-            	'commercial_bulksplit',
-            	'private_bulksplit',
-            	'privatehome_bulksplit'
-            	);
-            if(Mage::helper('logistics/data')->isVconnetEnabled() == false) {
-            	array_unshift($shipping_methods,'pickup');
-            }
-
-            $method_names = array_flip(Mage::getModel('logistics/shippingMethods')->getMethodName());
-
-            $methods_array = array();
-            foreach ($shipping_methods as $key => $value) {
-
-                if (array_key_exists($value, $method_names)) {
-                    $methods_array[$method_names[$value]] = $method_names[$value];
-                }
-            }
-
-            return $methods_array;
-        } elseif ($carrier_name == 'smartsendpostdanmark') {
-
-			//Post Danmark shipping methods
-            $shipping_methods = array(
-            	'private',
-            	'privatehome',
-            	'commercial',
-            	'dpdclassic',
-            	'dpdguranty',
-            	'valuemail',
-            	'privatesamsending',
-            	'privatepriority',
-            	'privateeconomy'
-            	);
-            if(Mage::helper('logistics/data')->isVconnetEnabled() == false) {
-            	array_unshift($shipping_methods,'pickup');
-            }
-
-            $method_names = array_flip(Mage::getModel('logistics/shippingMethods')->getMethodName());
-
-            $methods_array = array();
-            foreach ($shipping_methods as $key => $value) {
-
-                if (array_key_exists($value, $method_names)) {
-                    $methods_array[$method_names[$value]] = $method_names[$value];
-                }
-            }
-
-            return $methods_array;
-        } elseif ($carrier_name == 'smartsendposten') {
-
-			//Posten shipping methods
-            $shipping_methods = array(
-            	'private',
-            	'privatehome',
-            	'commercial',
-            	'valuemail',
-            	'valuemailfirstclass',
-            	'valuemaileconomy',
-            	'maximail'
-            	);
-            if(Mage::helper('logistics/data')->isVconnetEnabled() == false) {
-            	array_unshift($shipping_methods,'pickup');
-            }
-
-            $method_names = array_flip(Mage::getModel('logistics/shippingMethods')->getMethodName());
-
-            $methods_array = array();
-            foreach ($shipping_methods as $key => $value) {
-
-                if (array_key_exists($value, $method_names)) {
-                    $methods_array[$method_names[$value]] = $method_names[$value];
-                }
-            }
-
-            return $methods_array;
-        } elseif ($carrier_name == 'smartsendswipbox') {
-
-			//SwipBox shipping methods
-            $shipping_methods = array(
-            	'pickup'
-            	);
-
-            $method_names = array_flip(Mage::getModel('logistics/shippingMethods')->getMethodName());
-
-            $methods_array = array();
-            foreach ($shipping_methods as $key => $value) {
-
-                if (array_key_exists($value, $method_names)) {
-                    $methods_array[$method_names[$value]] = $method_names[$value];
-                }
-            }
-
-            return $methods_array;
-        } elseif ($carrier_name == 'smartsendpickup') {
-
-			//Closest shipping methods
-            $shipping_methods = array();
-            if(Mage::helper('logistics/data')->isVconnetEnabled() == false) {
-            	array_unshift($shipping_methods,'pickup');
-            }
-
-            $method_names = array_flip(Mage::getModel('logistics/shippingMethods')->getMethodName());
-
-            $methods_array = array();
-            foreach ($shipping_methods as $key => $value) {
-
-                if (array_key_exists($value, $method_names)) {
-                    $methods_array[$method_names[$value]] = $method_names[$value];
-                }
-            }
-
-            return $methods_array;
-        } elseif ($carrier_name == 'smartsendgls') {
-
-			//GLS shipping methods
-            $shipping_methods = array(
-            	'private',
-            	'privatehome',
-            	'commercial'
-            	);
-            if(Mage::helper('logistics/data')->isVconnetEnabled() == false) {
-            	array_unshift($shipping_methods,'pickup');
-            }
-
-            $method_names = array_flip(Mage::getModel('logistics/shippingMethods')->getMethodName());
-
-            $methods_array = array();
-            foreach ($shipping_methods as $key => $value) {
-
-                if (array_key_exists($value, $method_names)) {
-                    $methods_array[$method_names[$value]] = $method_names[$value];
-                }
-            }
-
-            return $methods_array;
-        }
+        return $shipping_methods;
+        
     }
 
-    public function getMethodName() {
-
-        return array(
-            'Pickuppoint' 			=> 'pickup',
-            'Private to home' 		=> 'privatehome',
-            'Commercial' 			=> 'commercial',
-            'Private' 				=> 'private',
-            'DPDclassic' 			=> 'dpdclassic',
-            'DPDguarantee' 			=> 'dpdguranty',
-            'Valuemail' 			=> 'valuemail',
-            'Valuemailfirstclass'	=> 'valuemailfirstclass',
-            'Valuemaileconomy' 		=> 'valuemaileconomy',
-            'Maximail' 				=> 'maximail',
-            'Commercial Bulksplit'	=> 'commercial_bulksplit',
-            'Private Bulksplit' 	=> 'private_bulksplit',
-            'Privatehome Bulksplit' => 'privatehome_bulksplit',
-            'Private samsending' 	=> 'privatesamsending',
-            'Private priority'		=> 'privatepriority',
-            'Private economy'		=> 'privateeconomy'
-        );
-    }
-
-    public function getTitleValue($opt) {
-
-        if ($opt == "Private") {   //getting title of the shipping method
-            $label = "Privat";
-        } elseif ($opt == "Commercial") {
-            $label = "Erhverv";
-        } else {
-            $label = $opt;
-        }
-
-        return $label;
-    }
-
-    public function checkShippingFee($carrier, $shipping_country) {    //cheking shipping fees for the shipping method
-        $orderPrice = Mage::getModel('checkout/session')->getQuote()->getGrandTotal();          //getting order total
-        $orderWeight = Mage::registry('ordweight');                       //getting order  weight
+    public function checkShippingFee($carrier, $shipping_country, $orderPrice, $orderWeight) {    //cheking shipping fees for the shipping method
 
         if (Mage::getStoreConfig('carriers/' . $carrier . '/price') != "") {
             $pickupShippingRates = unserialize(Mage::getStoreConfig('carriers/' . $carrier . '/price', Mage::app()->getStore()));                   //unserializing the shipping rates from the shipping rate table
@@ -233,12 +139,14 @@ class Smartsend_Logistics_Model_ShippingMethods extends Varien_Object {
         if (is_array($pickupShippingRates)) {
 
             foreach ($pickupShippingRates as $pickupShippingRate) {
-                $countries = explode(',', $pickupShippingRate['countries']);
-                $countries = array_map("strtoupper", $countries);
+            	$countries = strtoupper(str_replace(" ", "",$pickupShippingRate['countries']));
+                $countries = explode(',', $countries);
 
-				if(in_array(strtoupper($shipping_country), $countries)
-					&& (float)$pickupShippingRate['orderminprice'] <= (float)$orderPrice && (float)$pickupShippingRate['ordermaxprice'] >= (float)$orderPrice
-					&& (float)$pickupShippingRate['orderminweight'] <= (float)$orderWeight && (float)$pickupShippingRate['ordermaxweight'] >= (float)$orderWeight
+				if( (in_array(strtoupper($shipping_country), $countries) || in_array('*', $countries))
+					&& (float)$pickupShippingRate['orderminprice'] <= (float)$orderPrice
+					&& ( (float)$pickupShippingRate['ordermaxprice'] >= (float)$orderPrice || (float)$pickupShippingRate['ordermaxprice'] == 0)
+					&& (float)$pickupShippingRate['orderminweight'] <= (float)$orderWeight
+					&& ( (float)$pickupShippingRate['ordermaxweight'] >= (float)$orderWeight || (float)$pickupShippingRate['ordermaxweight'] == 0)
 					) {
 					
 					// The shipping rate is valid.
@@ -247,28 +155,50 @@ class Smartsend_Logistics_Model_ShippingMethods extends Varien_Object {
 						//There is already a shipping method with the name in the array of valid shipping methods.
 						if ( (int)$cheapestexpensive == 0 && ( (float) $shippingmethods[$pickupShippingRate['methods']] > (float) $pickupShippingRate['pickupshippingfee'] )) {
 							//This method is cheaper and will override existing shipping method
-							$shippingmethods[$pickupShippingRate['methods']] = $pickupShippingRate['pickupshippingfee'];
+							$shippingmethods[$pickupShippingRate['methods']] = array(
+								'shippingfee'		=> $pickupShippingRate['pickupshippingfee'],
+								'frontend_title'	=> $pickupShippingRate['method_name']
+								);
 						} elseif ( (int)$cheapestexpensive == 1 && ( (float) $shippingmethods[$rates['methods']] < (float) $pickupShippingRate['pickupshippingfee'] )) {
 							//This method is more expensive and will override existing shipping method
-							$shippingmethods[$pickupShippingRate['methods']] = $pickupShippingRate['pickupshippingfee'];
+							$shippingmethods[$pickupShippingRate['methods']] = array(
+								'shippingfee'		=> $pickupShippingRate['pickupshippingfee'],
+								'frontend_title'	=> $pickupShippingRate['method_name']
+								);
+
 						}
 					} else {
 						//Add the shipping method to the array of valid methods.
-						$shippingmethods[$pickupShippingRate['methods']] = $pickupShippingRate['pickupshippingfee'];
+						$shippingmethods[$pickupShippingRate['methods']] = array(
+								'shippingfee'		=> $pickupShippingRate['pickupshippingfee'],
+								'frontend_title'	=> $pickupShippingRate['method_name']
+								);
+
 					}
 			
                 }
             }
         }
+
         return $shippingmethods;
     }
 
-    public function getLabel() {     //generate label method
-        // Dummy function that is not used
-    }
+    
+    public function excludedTax($shipping_method){
+        $shippingmethods=array();
+        
+        $shippingmethods[]='smartsendpostdanmark_pickup';
+        $shippingmethods[]='smartsendpostdanmark_private';
+        $shippingmethods[]='smartsendpostdanmark_privatehome';
+        $shippingmethods[]='smartsendpostdanmark_privatepriority';
+        $shippingmethods[]='smartsendpostdanmark_valuemail';
 
-    public function getReturnLabel() {     //generate label method
-        // Dummy function that is not used 
+        
+        if(in_array($shipping_method,$shippingmethods)){
+            return true;
+        }else{
+            return false;
+        }
+        
     }
-
 }

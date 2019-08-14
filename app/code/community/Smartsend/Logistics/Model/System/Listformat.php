@@ -27,10 +27,10 @@
 class Smartsend_Logistics_Model_System_Listformat extends Mage_Core_Model_Config_Data {
 
     public function toOptionArray() {                 //address list format for the admin system config
-        $opt[1] = array('value' => 1, 'label' => Mage::helper('adminhtml')->__("#Company, #Street, #Zipcode #City"));
-        $opt[2] = array('value' => 2, 'label' => Mage::helper('adminhtml')->__("#Company, #Street, #Zipcode"));
-        $opt[3] = array('value' => 3, 'label' => Mage::helper('adminhtml')->__("#Company, #Street, #City"));
-        $opt[4] = array('value' => 4, 'label' => Mage::helper('adminhtml')->__("#Company, #Street"));
+        $opt[1] = array('value' => 1, 'label' => "#".Mage::helper('logistics')->__("Company").", #".Mage::helper('logistics')->__("Street").", #".Mage::helper('logistics')->__("Zipcode")." #".Mage::helper('logistics')->__("City"));
+        $opt[2] = array('value' => 2, 'label' =>  "#".Mage::helper('logistics')->__("Company").", #".Mage::helper('logistics')->__("Street").", #".Mage::helper('logistics')->__("Zipcode"));
+        $opt[3] = array('value' => 3, 'label' =>  "#".Mage::helper('logistics')->__("Company").", #".Mage::helper('logistics')->__("Street").", #".Mage::helper('logistics')->__("City"));
+        $opt[4] = array('value' => 4, 'label' =>  "#".Mage::helper('logistics')->__("Company").", #".Mage::helper('logistics')->__("Street"));
         return $opt;
     }
 

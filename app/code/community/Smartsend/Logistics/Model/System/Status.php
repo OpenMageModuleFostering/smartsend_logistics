@@ -17,22 +17,25 @@
  * versions in the future. If you wish to customize the plugin for your
  * needs please refer to http://www.smartsend.dk
  *
- * @folder		/app/code/community/Smartsend/Logistics/Model/System/PickupMethods.php
+ * @folder		/app/code/community/Smartsend/Logistics/Model/System/Status.php
  * @category	Smartsend
  * @package		Smartsend_Logistics
  * @author		Anders Bilfeldt
  * @url			www.smartsend.dk
  */
 
+class Smartsend_Logistics_Model_System_Status extends Mage_Core_Model_Config_Data {
 
-class Smartsend_Logistics_Model_System_PickupMethods extends Mage_Core_Model_Config_Data {
+    public function toOptionArray() {                 //address list format for the admin system config
 
-    public function toOptionArray() {            //different pickup methods 
-        $opt[] = array('value' => 'postdanmark', 'label' => Mage::helper('adminhtml')->__("PostDanmark"));
-        $opt[] = array('value' => 'swipbox', 'label' => Mage::helper('adminhtml')->__("Swipbox"));
-        $opt[] = array('value' => 'bring', 'label' => Mage::helper('adminhtml')->__("Bring"));
-        $opt[] = array('value' => 'gls', 'label' => Mage::helper('adminhtml')->__("GLS"));
-        $opt[] = array('value' => 'posten', 'label' => Mage::helper('adminhtml')->__("Posten"));
+		$opt[] = array('value' => '', 'label' =>  Mage::helper('logistics')->__("Don't change order status"));
+
+		// Create status array
+		$all_status = Mage::getModel('sales/order_status')->getResourceCollection()->getData();
+		foreach($all_status as $single_status) {
+			$opt[] = array('value' => $single_status["status"], 'label' => $single_status["label"]);
+		}
+
         return $opt;
     }
 

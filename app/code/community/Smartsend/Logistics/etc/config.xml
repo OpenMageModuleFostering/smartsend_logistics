@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Smartsend_Logistics>
-            <version>7.0.5</version>
+            <version>7.1.0</version>
         </Smartsend_Logistics>
     </modules>
     <frontend>
@@ -33,16 +33,16 @@
         </layout>
     </frontend>
     <admin>
-        <routers>
-            <logistics>
-                <use>admin</use>
-                <args>
-                    <module>Smartsend_Logistics</module>                   <!--smartsend admin -->
-                    <frontName>logistics</frontName>
-                </args>
-            </logistics>
-        </routers>
-    </admin>
+		<routers>
+			<adminhtml>
+				<args>
+					<modules>
+						<Smartsend_Logistics after="Mage_Adminhtml">Smartsend_Logistics</Smartsend_Logistics>
+					</modules>
+				</args>
+			</adminhtml>
+		</routers>
+	</admin>
     <adminhtml>
         <translate>
             <modules>
@@ -136,6 +136,24 @@
                     </sales_quote_load_after>
                 </observers>
             </sales_quote_load_after>
+             <admin_system_config_changed_section_carriers>
+                <observers>
+                    <admin_system_config_changed_section_carriers>
+                        <type>singleton</type>
+                        <class>logistics/observer</class>
+                        <method>changedSection</method>
+                    </admin_system_config_changed_section_carriers>
+                </observers>
+            </admin_system_config_changed_section_carriers>
+            <controller_action_predispatch_adminhtml_system_config_save>
+                <observers>
+                    <predispatch_adminhtml_system_config_save>
+                        <type>singleton</type>
+                        <class>logistics/observer</class>
+                        <method>changedSectionBefore</method>
+                    </predispatch_adminhtml_system_config_save>
+                </observers>
+            </controller_action_predispatch_adminhtml_system_config_save>
         </events>
         <models>
             <logistics>
@@ -151,24 +169,15 @@
                     <posten>
                         <table>smartsend_pickup</table>
                     </posten>
-                    <swipbox>
-                        <table>smartsend_pickup</table>
-                    </swipbox>
                     <gls>
                         <table>smartsend_pickup</table>
                     </gls>
                     <bring>
                         <table>smartsend_pickup</table>
-                    </bring>
-                    <pickup>
-                        <table>smartsend_pickup</table>
-                    </pickup>
-                    <shipping>
-                        <table>shipping_rates_name</table>
-                    </shipping>
-                    <shippingrates>
-                        <table>pickup_shipping_rates</table>
-                    </shippingrates>
+                    </bring> 
+                    <flex>
+                        <table>smartsend_flexdelivery</table>
+                    </flex>
                 </entities>
             </logistics_mysql4>
         </models>
@@ -216,14 +225,27 @@
                 </rewrite>
             </tax>
         </models>
-        
+        <template>
+            <email>
+                 <smartsend_new_shipment_email translate="label" module="adminhtml">
+                    <label>Smart Send: New Shipment</label>
+                    <file>smartsend_new_shipment_email.html</file>
+                    <type>html</type>
+                </smartsend_new_shipment_email>
+            </email>
+        </template>
     </global>
     <default>                                             <!-- default for the carriers  -->
         <carriers>
         	<smartsend>
                 <username></username>
-                <licencekey></licencekey>
-                <combinepdf>0</combinepdf>
+                <licencekey></licencekey> 
+                <validation>Please enter valid user information</validation>              
+                <combinepdf>1</combinepdf>
+                <listformat>1</listformat>                      <!-- is listtype #Company, #Street, #Zipcode #City-->
+                <status></status>                      			<!-- order status -->
+                <sendemail>0</sendemail>                      	<!-- send email with shipments -->
+                <includeordercomment>0</includeordercomment>    <!-- include order comment on label -->
             </smartsend>
             <smartsendpostdanmark>
                 <active>0</active>                             <!-- is not active -->
@@ -231,13 +253,13 @@
                 <title>Post Danmark</title>                     <!-- title -->
                 <cheapestexpensive>0</cheapestexpensive>        <!-- is cheapest -->
                 <excludetax>0</excludetax>						<!-- Exclude from TAX -->
-                <listformat>1</listformat>                      <!-- is listtype #Company, #Street, #Zipcode #City-->
                 <format>pdf</format>                            <!-- format is PDF file -->
                 <quickid>1</quickid>							<!-- Default QuickId=1 -->
                 <waybillid></waybillid>							<!-- Default WaybillId=NULL -->
                 <notemail>1</notemail>                          <!-- Email notification is ON -->
                 <notesms>1</notesms>                            <!-- SMS notification is ON -->
                 <prenote>0</prenote>                            <!-- pre-notification is OFF -->
+                <flexdelivery>smartsendpostdanmark_lastmile</flexdelivery>	<!-- Flexdelivery is activated for lastmile -->
                 <return></return>            					<!-- standard return shipping method -->
             </smartsendpostdanmark>
             <smartsendposten>
@@ -245,14 +267,13 @@
                 <model>logistics/carrier_posten</model>
                 <title>Posten</title>
                 <cheapestexpensive>0</cheapestexpensive>
-                <excludetax>0</excludetax>
-                <listformat>1</listformat>
                 <format>pdf</format>
                 <quickid>1</quickid>
                 <waybillid></waybillid>
                 <notemail>1</notemail>
                 <notesms>1</notesms>
                 <prenote>0</prenote>
+                <flexdelivery></flexdelivery>
                 <return></return>
             </smartsendposten>
             <smartsendgls>
@@ -260,8 +281,6 @@
                 <model>logistics/carrier_gls</model>
                 <title>GLS</title>
                 <cheapestexpensive>0</cheapestexpensive>
-                <excludetax>0</excludetax>
-                <listformat>1</listformat>
                 <notemail>1</notemail>
                 <notesms>1</notesms>
                 <return></return>
@@ -271,33 +290,10 @@
                 <model>logistics/carrier_bring</model>
                 <title>Bring</title>
                 <cheapestexpensive>0</cheapestexpensive>
-                <excludetax>0</excludetax>
-                <listformat>1</listformat>
                 <notemail>1</notemail>
                 <notesms>1</notesms>
                 <return></return>
             </smartsendbring>
-            <smartsendswipbox>
-                <active>0</active>
-                <model>logistics/carrier_swipbox</model>
-                <title>SwipBox</title>
-                <cheapestexpensive>0</cheapestexpensive>
-                <excludetax>0</excludetax>
-                <listformat>1</listformat>
-                <size>0</size>
-                <return></return>
-            </smartsendswipbox>
-            <smartsendpickup>
-                <active>0</active>
-                <model>logistics/carrier_pickup</model>
-                <methods>postdanmark,swipbox,bring,gls,posten</methods>
-                <title>Smart Send</title>
-                <name>Closest pickup</name>  
-                <cheapestexpensive>0</cheapestexpensive>
-                <excludetax>0</excludetax>
-                <listformat>0</listformat>
-                <return></return>
-            </smartsendpickup>
         </carriers>
     </default>
 </config>

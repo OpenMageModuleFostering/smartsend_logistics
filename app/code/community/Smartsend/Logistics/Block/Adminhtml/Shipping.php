@@ -27,27 +27,27 @@ class Smartsend_Logistics_Block_Adminhtml_Shipping extends Mage_Adminhtml_Block_
 
     public function __construct() {      // create columns for the table rate for the carriers(other than pickup) system config 
         $this->addColumn('methods', array(
-            'label' => $this->__('Methods'),
+            'label' => $this->__('Shipping method'),
             'size' => 6,
         ));
         $this->addColumn('orderminprice', array(
-            'label' => $this->__('Min Price'),
+            'label' => $this->__('Min. price'),
             'size' => 6,
         ));
         $this->addColumn('ordermaxprice', array(
-            'label' => $this->__('Max Price'),
+            'label' => $this->__('Max. price'),
             'size' => 6,
         ));
         $this->addColumn('orderminweight', array(
-            'label' => $this->__('Min Weight'),
+            'label' => $this->__('Min. weight'),
             'size' => 6,
         ));
         $this->addColumn('ordermaxweight', array(
-            'label' => $this->__('Max Weight'),
+            'label' => $this->__('Max. weight'),
             'size' => 6,
         ));
         $this->addColumn('pickupshippingfee', array(
-            'label' => $this->__('Shipping Fee'),
+            'label' => $this->__('Shipping fee'),
             'size' => 6,
         ));
 
@@ -57,17 +57,25 @@ class Smartsend_Logistics_Block_Adminhtml_Shipping extends Mage_Adminhtml_Block_
         ));
 
         $this->addColumn('method_name', array(
-            'label' => $this->__('Method Name'),
+            'label' => $this->__('Title'),
             'size' => 6,
         ));
 
         $this->_addAfter = false;
-        $this->_addButtonLabel = $this->__('Add Rate');
+        $this->_addButtonLabel = $this->__('Add rate');
 
         parent::__construct();
         $this->setTemplate('logistics/array_dropdown.phtml');    //get the dropdown for the price shipping table for carriers other than pickup carrier
     }
 
+
+	/**
+	  * Funciton to return the input fields of the shipping table
+	  *
+	  * @param string $columnName Is the column name of the shipping table
+	  *
+	  * @return string HTML string of field (input, select ...)
+	  */
     protected function _renderCellTemplate($columnName) {  //inserts the value to the created columns above
         if (empty($this->_columns[$columnName])) {          //checking the column names 
             throw new Exception('Wrong column name specified.');

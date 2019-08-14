@@ -1,29 +1,52 @@
 <?xml version="1.0"?>
 <layout version="0.1.0">
     <checkout_onepage_index>
-    	<reference name='head'>
-    		<reference name="head">
-	            <action method="addItem"><type>js</type><name>logistics/jquery-1.6.4.min.js</name></action>
-	            <action method="addItem"><type>js</type><name>logistics/noconflict.js</name></action>
-        	</reference>
-    	</reference>
-    	<reference name='checkout.onepage.shipping_method.available'>     <!-- available shipping methods  -->
-    		<action method='setTemplate'>
-                    <template>logistics/checkout/onepage/shipping_method/available.phtml</template>
+        <reference name='head'>
+            <reference name="head">
+                <action method="addItem">
+                    <type>js</type>
+                    <name>logistics/jquery-1.10.2.min.js</name>
                 </action>
-    	</reference>
+                <action method="addItem">
+                    <type>js</type>
+                    <name>logistics/noconflict.js</name>
+                </action>
+            </reference>
+        </reference>
+        <reference name='checkout.onepage.shipping_method.available'>     <!-- available shipping methods  -->
+            <action method='setTemplate'>
+                <template>logistics/checkout/onepage/shipping_method/available.phtml</template>
+            </action>
+        </reference>
     </checkout_onepage_index>
+    <checkout_cart_index>
+        <reference name='checkout.cart.shipping'>     <!-- available shipping methods  -->
+            <action method='setTemplate'>
+                <template>logistics/checkout/cart/shipping.phtml</template>
+            </action>
+        </reference>
+    </checkout_cart_index> 
     <checkout_onepage_shippingmethod>
-    	<reference name='root'>          <!-- available shipping methods  -->
-    		<action method='setTemplate'>
-                    <template>logistics/checkout/onepage/shipping_method/available.phtml</template>
-                </action>
-    	</reference>
+        <reference name='root'>          <!-- available shipping methods  -->
+            <action method='setTemplate'>
+                <template>logistics/checkout/onepage/shipping_method/available.phtml</template>
+            </action>
+        </reference>
     </checkout_onepage_shippingmethod>
     <onestepcheckout_index_index>
         <reference name="head">
-            <action method="addItem"><type>js</type><name>logistics/jquery-1.6.4.min.js</name></action>
-	    <action method="addItem"><type>js</type><name>logistics/noconflict.js</name></action>
+            <action method="addItem">
+                <type>js</type>
+                <name>logistics/jquery-1.10.2.min.js</name>
+            </action>
+            <action method="addItem">
+                <type>js</type>
+                <name>logistics/noconflict.js</name>
+            </action>
+            <action method="addItem">
+                <type>skin_js</type>
+                <name>js/logistics.js</name>
+            </action>
         </reference>
         <reference name ="choose-shipping-method">
             <action method="setTemplate">
@@ -38,4 +61,128 @@
             </action>
         </reference>
     </onestepcheckout_ajax_save_billing>
+    
+    <!-- START: Overriding 'Magestore One Step Checkout' shipping method templates -->
+    <onestepcheckout_index_index_flat_20columns>
+        <reference name="head">
+            <action method="addItem">
+                <type>js</type>
+                <name>logistics/jquery-1.10.2.min.js</name>
+            </action>
+            <action method="addItem">
+                <type>js</type>
+                <name>logistics/noconflict.js</name>
+            </action>
+        </reference>
+        <reference name ="onestepcheckout_shipping_method">
+            <action method="setTemplate">
+                <template>logistics/magestoreOnestepcheckout/shipping_method.phtml</template>
+            </action>
+        </reference>
+    </onestepcheckout_index_index_flat_20columns>
+    <onestepcheckout_index_index_flat_25columns> 
+        <reference name="head">
+            <action method="addItem">
+                <type>js</type>
+                <name>logistics/jquery-1.10.2.min.js</name>
+            </action>
+            <action method="addItem">
+                <type>js</type>
+                <name>logistics/noconflict.js</name>
+            </action>
+        </reference>
+        <reference name ="onestepcheckout_shipping_method">
+            <action method="setTemplate">
+                <template>logistics/magestoreOnestepcheckout/shipping_method.phtml</template>
+            </action>
+        </reference>
+    </onestepcheckout_index_index_flat_25columns>
+    <onestepcheckout_index_index_flat_30columns>
+        <reference name="head">
+            <action method="addItem">
+                <type>js</type>
+                <name>logistics/jquery-1.10.2.min.js</name>
+            </action>
+            <action method="addItem">
+                <type>js</type>
+                <name>logistics/noconflict.js</name>
+            </action>
+        </reference>
+        <reference name ="onestepcheckout_shipping_method">
+            <action method="setTemplate">
+                <template>logistics/magestoreOnestepcheckout/shipping_method.phtml</template>
+            </action>
+        </reference>
+    </onestepcheckout_index_index_flat_30columns>
+    <onestepcheckout_index_index_material_20columns>
+        <reference name="head">
+            <action method="addItem">
+                <type>js</type>
+                <name>logistics/jquery-1.10.2.min.js</name>
+            </action>
+            <action method="addItem">
+                <type>js</type>
+                <name>logistics/noconflict.js</name>
+            </action>
+        </reference>
+        <reference name ="onestepcheckout_shipping_method">
+            <action method="setTemplate">
+                <template>logistics/magestoreOnestepcheckout/shipping_method.phtml</template>
+            </action>
+        </reference>
+    </onestepcheckout_index_index_material_20columns>
+    <onestepcheckout_index_index_material_25columns> 
+        <reference name="head">
+            <action method="addItem">
+                <type>js</type>
+                <name>logistics/jquery-1.10.2.min.js</name>
+            </action>
+            <action method="addItem">
+                <type>js</type>
+                <name>logistics/noconflict.js</name>
+            </action>
+        </reference>
+        <reference name ="onestepcheckout_shipping_method">
+            <action method="setTemplate">
+                <template>logistics/magestoreOnestepcheckout/shipping_method.phtml</template>
+            </action>
+        </reference>
+    </onestepcheckout_index_index_material_25columns>
+    <onestepcheckout_index_index_material_30columns> 
+        <reference name="head">
+            <action method="addItem">
+                <type>js</type>
+                <name>logistics/jquery-1.10.2.min.js</name>
+            </action>
+            <action method="addItem">
+                <type>js</type>
+                <name>logistics/noconflict.js</name>
+            </action>
+        </reference>
+        <reference name ="onestepcheckout_shipping_method">
+            <action method="setTemplate">
+                <template>logistics/magestoreOnestepcheckout/shipping_method.phtml</template>
+            </action>
+        </reference>
+    </onestepcheckout_index_index_material_30columns>
+        
+    <!-- START: on saving shipping address -->
+    <onestepcheckout_shipping_payment_review_material_20columns>
+        <block type="checkout/onepage_shipping_method_available" name="onestepcheckout_shipping_method" as="onestepcheckout_shipping_method" template="logistics/magestoreOnestepcheckout/shipping_method.phtml" />
+        <update handle="onestepcheckout_payment_review_material_20columns"/>
+    </onestepcheckout_shipping_payment_review_material_20columns>
+    
+    <onestepcheckout_shipping_payment_review_flat_20columns>
+        <block type="checkout/onepage_shipping_method_available" name="onestepcheckout_shipping_method" as="onestepcheckout_shipping_method" template="logistics/magestoreOnestepcheckout/shipping_method.phtml" />
+        <update handle="onestepcheckout_payment_review_flat_20columns"/>
+    </onestepcheckout_shipping_payment_review_flat_20columns>
+    
+    <onestepcheckout_shipping_payment_review_flat_30columns>
+        <block type="checkout/onepage_shipping_method_available" name="onestepcheckout_shipping_method" as="onestepcheckout_shipping_method" template="logistics/magestoreOnestepcheckout/shipping_method.phtml" />
+        <update handle="onestepcheckout_payment_review_flat_30columns"/>
+    </onestepcheckout_shipping_payment_review_flat_30columns>
+    <!-- END: on saving shipping address -->
+
+    <!-- END: START: Overriding 'Magestore One Step Checkout' shipping method templates -->
+
 </layout> 

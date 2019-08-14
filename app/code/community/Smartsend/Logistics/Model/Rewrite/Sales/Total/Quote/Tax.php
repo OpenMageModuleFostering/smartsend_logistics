@@ -33,7 +33,7 @@ class Smartsend_Logistics_Model_Rewrite_Sales_Total_Quote_Tax  extends Mage_Tax_
         $taxRateRequest->setProductClassId($this->_config->getShippingTaxClass($this->_store));
         
         
-        //custom code - start
+        //Smart Send custom code - start
         $shipping_method= Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress()->getShippingMethod();
         
         if(substr($shipping_method, 0, strlen('smartsend')) === 'smartsend') {
@@ -41,13 +41,13 @@ class Smartsend_Logistics_Model_Rewrite_Sales_Total_Quote_Tax  extends Mage_Tax_
         	$carrier=explode('_',$shipping_method);
         	$smartsend_carrier=$carrier['0'];
         
-        	$exclude_tax= Mage::getStoreConfig("carriers/".$smartsend_carrier."/excludetax");
-    
-        	if($exclude_tax) {
-            	$taxRateRequest->setProductClassId(0);
+        	$exclude_tax	= Mage::getStoreConfig("carriers/".$smartsend_carrier."/excludetax");
+            $excludedMethod	= Mage::getModel('logistics/shippingMethods')->excludedTax($shipping_method);
+        	if ($exclude_tax && $excludedMethod) {
+                $taxRateRequest->setProductClassId(0);
         	}
         }
-        //custom code - end
+        //Smart Send custom code - end
         
       
         $rate           = $this->_calculator->getRate($taxRateRequest);

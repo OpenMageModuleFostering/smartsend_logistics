@@ -23,21 +23,17 @@
  * @author		Anders Bilfeldt
  * @url			www.smartsend.dk
  */
+class Smartsend_Logistics_Model_Rewrite_Sales_Total_Quote_Shipping extends Mage_Tax_Model_Sales_Total_Quote_Shipping {
 
-class Smartsend_Logistics_Model_Rewrite_Sales_Total_Quote_Shipping  extends Mage_Tax_Model_Sales_Total_Quote_Shipping
-{
-    
-    public function collect(Mage_Sales_Model_Quote_Address $address)
-    {
-        
+    public function collect(Mage_Sales_Model_Quote_Address $address) {
+ 
         $this->_setAddress($address);
         /**
          * Reset amounts
          */
         $this->_setAmount(0);
         $this->_setBaseAmount(0);
-       
-        
+
         $calc               = $this->_calculator;
         $store              = $address->getQuote()->getStore();
         $storeTaxRequest    = $calc->getRateOriginRequest($store);
@@ -47,70 +43,99 @@ class Smartsend_Logistics_Model_Rewrite_Sales_Total_Quote_Shipping  extends Mage
             $address->getQuote()->getCustomerTaxClassId(),
             $store
         );
-
-        $shippingTaxClass = $this->_config->getShippingTaxClass($store);
-        
         
         //custom code - start
-        $shipping_method = Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress()->getShippingMethod();
         
-        if(substr($shipping_method, 0, strlen('smartsend')) === 'smartsend') {
-        	$carrier = explode('_',$shipping_method);
-        	$smartsend_carrier = $carrier['0'];
-        
-        	$exclude_tax = Mage::getStoreConfig("carriers/".$smartsend_carrier."/excludetax");
-    
-			if($exclude_tax) {
-			  $shippingTaxClass=0; 
-			}
-		}
-        //custom code - end
-     
-        $storeTaxRequest->setProductClassId($shippingTaxClass);
-        $addressTaxRequest->setProductClassId($shippingTaxClass);
-
+        $shippingTaxClass = $this->_config->getShippingTaxClass($store);
         $priceIncludesTax = $this->_config->shippingPriceIncludesTax($store);
-        if ($priceIncludesTax) {
-            $this->_areTaxRequestsSimilar = $calc->compareRequests($addressTaxRequest, $storeTaxRequest);
+
+		$smartsend_exclude = false;
+
+        $shipping_method = Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress()->getShippingMethod();
+
+        if (substr($shipping_method, 0, strlen('smartsend')) === 'smartsend') {
+            $carrier = explode('_', $shipping_method);
+            $smartsend_carrier = $carrier['0'];
+
+            $exclude_tax = Mage::getStoreConfig("carriers/" . $smartsend_carrier . "/excludetax");
+            $excludedMethod = Mage::getModel('logistics/shippingMethods')->excludedTax($shipping_method);
+
+            if ($exclude_tax && $excludedMethod) {
+                $smartsend_exclude = true;
+                $shippingTaxClass = 0;
+            }
         }
 
-        $shipping           = $taxShipping = $address->getShippingAmount();
-        $baseShipping       = $baseTaxShipping = $address->getBaseShippingAmount();
+        $shipping = $taxShipping = $address->getShippingAmount();
+        $baseShipping = $baseTaxShipping = $address->getBaseShippingAmount();
+
+        if ($smartsend_exclude && $priceIncludesTax) {
+            $rate = $calc->getRate($addressTaxRequest);
+            $taxExact = $calc->calcTaxAmount($shipping, $rate, true, false);
+            $baseTaxExact = $calc->calcTaxAmount($baseShipping, $rate, true, false);
+            $shipping = $taxShipping = $shipping - $taxExact;
+            $baseShipping = $baseTaxShipping = $baseShipping - $baseTaxExact;
+        }
+
+        $storeTaxRequest->setProductClassId($shippingTaxClass);
+        $addressTaxRequest->setProductClassId($shippingTaxClass);
+        
+        //custom code - end
+
+        if ($priceIncludesTax) {
+            if ($this->_helper->isCrossBorderTradeEnabled($store)) {
+                $this->_areTaxRequestsSimilar = true;
+            } else {
+                $this->_areTaxRequestsSimilar =
+                        $this->_calculator->compareRequests($storeTaxRequest, $addressTaxRequest);
+            }
+        }
+
         $rate               = $calc->getRate($addressTaxRequest);
         if ($priceIncludesTax) {
             if ($this->_areTaxRequestsSimilar) {
-                $taxExact       = $calc->calcTaxAmount($shipping, $rate, true, false);
-                $baseTaxExact   = $calc->calcTaxAmount($baseShipping, $rate, true, false);
+                $tax            = $this->_round($calc->calcTaxAmount($shipping, $rate, true, false), $rate, true);
+                $baseTax        = $this->_round(
+                    $calc->calcTaxAmount($baseShipping, $rate, true, false), $rate, true, 'base');
                 $taxShipping    = $shipping;
                 $baseTaxShipping = $baseShipping;
-                $shippingExact  = $shipping - $taxExact;
-                $baseShippingExact = $baseShipping - $baseTaxExact;
+                $shipping       = $shipping - $tax;
+                $baseShipping   = $baseShipping - $baseTax;
                 $taxable        = $taxShipping;
                 $baseTaxable    = $baseTaxShipping;
                 $isPriceInclTax = true;
-                $address->setTotalAmount('shipping', $shippingExact);
-                $address->setBaseTotalAmount('shipping', $baseShippingExact);
+                $address->setTotalAmount('shipping', $shipping);
+                $address->setBaseTotalAmount('shipping', $baseShipping);
             } else {
                 $storeRate      = $calc->getStoreRate($addressTaxRequest, $store);
                 $storeTax       = $calc->calcTaxAmount($shipping, $storeRate, true, false);
                 $baseStoreTax   = $calc->calcTaxAmount($baseShipping, $storeRate, true, false);
                 $shipping       = $calc->round($shipping - $storeTax);
                 $baseShipping   = $calc->round($baseShipping - $baseStoreTax);
-                $tax            = $this->_round($calc->calcTaxAmount($shipping, $rate, false, false), $rate, false);
+                $tax            = $this->_round($calc->calcTaxAmount($shipping, $rate, false, false), $rate, true);
                 $baseTax        = $this->_round(
-                    $calc->calcTaxAmount($baseShipping, $rate, false, false), $rate, false, 'base');
+                    $calc->calcTaxAmount($baseShipping, $rate, false, false), $rate, true, 'base');
                 $taxShipping    = $shipping + $tax;
                 $baseTaxShipping = $baseShipping + $baseTax;
-                $taxable        = $shipping;
-                $baseTaxable    = $baseShipping;
-                $isPriceInclTax = false;
+                $taxable        = $taxShipping;
+                $baseTaxable    = $baseTaxShipping;
+                $isPriceInclTax = true;
                 $address->setTotalAmount('shipping', $shipping);
                 $address->setBaseTotalAmount('shipping', $baseShipping);
             }
         } else {
-            $tax            = $this->_round($calc->calcTaxAmount($shipping, $rate, false, false), $rate, false);
-            $baseTax        = $this->_round(
-                $calc->calcTaxAmount($baseShipping, $rate, false, false), $rate, false, 'base');
+            $appliedRates = $calc->getAppliedRates($addressTaxRequest);
+            $taxes = array();
+            $baseTaxes = array();
+            foreach ($appliedRates as $appliedRate) {
+                $taxRate = $appliedRate['percent'];
+                $taxId = $appliedRate['id'];
+                $taxes[] = $this->_round($calc->calcTaxAmount($shipping, $taxRate, false, false), $taxId, false);
+                $baseTaxes[] = $this->_round(
+                    $calc->calcTaxAmount($baseShipping, $taxRate, false, false), $taxId, false, 'base');
+            }
+            $tax            = array_sum($taxes);
+            $baseTax        = array_sum($baseTaxes);
             $taxShipping    = $shipping + $tax;
             $baseTaxShipping = $baseShipping + $baseTax;
             $taxable        = $shipping;
@@ -129,8 +154,6 @@ class Smartsend_Logistics_Model_Rewrite_Sales_Total_Quote_Shipping  extends Mage
             $address->setBaseShippingAmountForDiscount($baseTaxShipping);
         }
         return $this;
-       
     }
 
 }
-

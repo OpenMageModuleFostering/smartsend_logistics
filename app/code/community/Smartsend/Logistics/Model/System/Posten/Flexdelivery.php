@@ -17,18 +17,26 @@
  * versions in the future. If you wish to customize the plugin for your
  * needs please refer to http://www.smartsend.dk
  *
- * @folder		/app/code/community/Smartsend/Logistics/Model/Mysql4/Swipbox/Collection.php
+ * @folder		/app/code/community/Smartsend/Logistics/Model/System/Posten/Flexdelivery.php
  * @category	Smartsend
  * @package		Smartsend_Logistics
  * @author		Anders Bilfeldt
  * @url			www.smartsend.dk
  */
 
-class Smartsend_Logistics_Model_Mysql4_Swipbox_Collection extends Mage_Core_Model_Mysql4_Collection_Abstract
-{
-    public function _construct()
+class Smartsend_Logistics_Model_System_Posten_Flexdelivery extends Mage_Core_Model_Config_Data {
+
+    public function toOptionArray()
     {
-        parent::_construct();
-        $this->_init('logistics/swipbox');
+   		$carrier = 'smartsendposten';
+   		$shipping_methods = Mage::getModel('logistics/ShippingMethods')->getShippingMethodByCarrier( $carrier );
+   	
+   		$option_array = array();
+   		foreach($shipping_methods as $shipping_method_key => $shipping_method_value) {
+   			$option_array[] = array('value' => $carrier.'_'.$shipping_method_key, 'label' => $shipping_method_value);
+   		}
+
+    	return $option_array;
     }
+
 }

@@ -17,17 +17,18 @@
  * versions in the future. If you wish to customize the plugin for your
  * needs please refer to http://www.smartsend.dk
  *
- * @folder		/app/code/community/Smartsend/Logistics/Model/Swipbox.php
+ * @folder		/app/code/community/Smartsend/Logistics/Model/Mysql4/Flex.php
  * @category	Smartsend
  * @package		Smartsend_Logistics
  * @author		Anders Bilfeldt
  * @url			www.smartsend.dk
  */
-class Smartsend_Logistics_Model_Swipbox extends Mage_Core_Model_Abstract {
 
-    public function _construct() {
-        parent::_construct();
-        $this->_init('logistics/swipbox');
+class Smartsend_Logistics_Model_Mysql4_Flex extends Mage_Core_Model_Mysql4_Abstract
+{
+    public function _construct()
+    {    
+        // Note that the Flex_id refers to the key field in your database table.
+        $this->_init('logistics/flex', 'id');
     }
-
 }

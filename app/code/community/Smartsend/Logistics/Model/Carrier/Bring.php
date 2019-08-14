@@ -26,49 +26,7 @@
 class Smartsend_Logistics_Model_Carrier_Bring extends Mage_Shipping_Model_Carrier_Abstract implements Mage_Shipping_Model_Carrier_Interface {
 
     protected $_code = 'smartsendbring';
-
-    public function _post($street, $city, $postcode, $country) {
-        $ch = curl_init();               //intitiate curl
-
-        /* Script URL */
-        //$url = 'http://private-2d17c-smartsend.apiary-mock.com/pickup/';
-        $url = 'https://smartsend-prod.apigee.net/v7/pickup/';
-
-        $carriers = 'bring';
-
-        /* $_GET Parameters to Send */
-        $params = array('country' => $country, 'zip' => $postcode, 'city' => $city, 'street' => $street);
-
-        /* Update URL to container Query String of Paramaters */
-        $url .= $carriers . '?' . http_build_query($params);
-
-        curl_setopt($ch, CURLOPT_URL, $url);       //curl url
-        curl_setopt($ch, CURLOPT_HTTPGET, true);   //curl request method
-        //curl_setopt($ch, CURLOPT_HEADER, false);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-        	'apikey:yL18TETUVQ7E9pgVb6JeV1erIYHAMcwe',
-        	'smartsendmail:'.Mage::getStoreConfig('carriers/smartsend/username'),
-        	'smartsendlicence:'.Mage::getStoreConfig('carriers/smartsend/licencekey'),
-        	'cmssystem:Magento',
-        	'cmsversion:'.Mage::getVersion(),
-        	'appversion:'.Mage::getConfig()->getNode('modules/Smartsend_Logistics')->version
-        	));    //curl request header
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-        $result = new StdClass();                       //creating new class
-        $result->response = curl_exec($ch);             //executing the curl
-        $result->code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $result->meta = curl_getinfo($ch);
-        $curl_error = ($result->code > 0 ? null : curl_error($ch) . ' (' . curl_errno($ch) . ')');      //getting error from curl if any
-
-        curl_close($ch);                          //closing the curl
-
-        if ($curl_error) {
-            throw new Exception('An error occurred while connecting to Chargify: ' . $curl_error);
-        }
-        return $result;
-    }
-    
+ 
     public function isTrackingAvailable() {
     	return true;
 	}
@@ -78,45 +36,62 @@ class Smartsend_Logistics_Model_Carrier_Bring extends Mage_Shipping_Model_Carrie
     }
 
     public function collectRates(Mage_Shipping_Model_Rate_Request $request) {
-        if (!Mage::getStoreConfig('carriers/' . $this->_code . '/active')) {         //checking that carrier is active or not
+    	// Check that the carrier is not deactive
+        if (!Mage::getStoreConfig('carriers/' . $this->_code . '/active')) {
             return false;
         }
 
+		// Carrier information
         $handling = Mage::getStoreConfig('carriers/' . $this->_code . '/handling');
-        $result = Mage::getModel('shipping/rate_result');               //shipping rate table for the bring carrier
-        $bringShippingFee = $this->getBringShippingFee();               //getting bring shipping fees form table rate
-        $carrier_label = 'Bring';
-        $shipping_country = Mage::getSingleton('checkout/type_onepage')->getQuote()->getShippingAddress()     //shipping address from the checkout quote
-                ->getCountryId();
-        $show = true;
-        if ($show && $bringShippingFee!=NULL) { // This if condition is just to demonstrate how to return success and error in shipping methods
+        $result = Mage::getModel('shipping/rate_result'); // Table rate for shipping methods
+        $show = true; // Always true
+        
+        // Shipping country
+        $shipping_country = $request->getDestCountryId();
+                
+        // Order subtotal price (price without shipping) WITHOUT tax
+        // $order_subtotal = $request->getOrderSubtotal(); //NOT WORKING
+        $order_subtotal = $request->getPackageValueWithDiscount();
+        /*
+        // iterate over all item and add item price inc tax
+        $items = $request->getAllItems(); // Can include bundled items AND the subitems
+		$order_subtotal = 0;
+		foreach ($items as $item){
+			$order_subtotal += $item->getRowTotalInclTax();
+		}
+		*/
+        
+        // Order total weight
+        $order_weight = $request->getPackageWeight();
+                
+        if ($show) { // This if condition is just to demonstrate how to return success and error in shipping methods$method = Mage::getModel('shipping/rate_result_method');
             $carrier = $this->_code;
-            $check_method = Mage::getModel('logistics/shippingMethods')->checkShippingFee($carrier, $shipping_country);    //checking the shipping fee for the shipping method
+            
+            // Chek the table rates for valid shipping method
+            $shipping_methods_array = Mage::getModel('logistics/shippingMethods')->checkShippingFee($carrier, $shipping_country, $order_subtotal, $order_weight);
 
-            foreach ($check_method as $key => $value) {
+			if(is_array($shipping_methods_array)) {
+				foreach ($shipping_methods_array as $shipping_method_code => $shipping_method) {
 
-                $title = '';
-                foreach (unserialize($this->getConfigData('price')) as $val) {
-
-                    if ($val['methods'] == $key && $val['pickupshippingfee'] == $value) {
-
-                        $title = $val['method_name'];
-                        $method_code = Mage::getModel('logistics/shippingMethods')->getMethodName();           //getting the shipping method name 
-
-                        $method_code = $method_code[$val['methods']];
-                    }
-                }
-
-
-                $method = Mage::getModel('shipping/rate_result_method');            //saving the shipping method
-                $method->setCarrier($this->_code);
-                $method->setMethod($method_code);
-                $method->setCarrierTitle($this->getConfigData('title'));
-                $method->setMethodTitle($title);
-                $method->setPrice($value);
-                $method->setCost($value);
-                $result->append($method);
-            }
+					// Create a shipping method
+					$method = Mage::getModel('shipping/rate_result_method');
+					$method->setCarrier($this->_code);
+					$method->setMethod($shipping_method_code);
+					$method->setCarrierTitle( $this->getConfigData('title') );
+					$method->setMethodTitle( $shipping_method['frontend_title'] );
+					$method->setPrice( $shipping_method['shippingfee'] );
+					$method->setCost( $shipping_method['shippingfee'] );
+					
+					// Add shipping method to collection of valid methods
+					$result->append($method);
+				}
+			} else {
+				$error = Mage::getModel('shipping/rate_result_error');
+            	$error->setCarrier($this->_code);
+            	$error->setCarrierTitle($this->getConfigData('name'));
+            	$error->setErrorMessage($this->getConfigData('specificerrmsg'));
+            	$result->append($error);
+			}
         } else {
             $error = Mage::getModel('shipping/rate_result_error');
             $error->setCarrier($this->_code);
@@ -124,50 +99,16 @@ class Smartsend_Logistics_Model_Carrier_Bring extends Mage_Shipping_Model_Carrie
             $error->setErrorMessage($this->getConfigData('specificerrmsg'));
             $result->append($error);
         }
-
         return $result;
     }
 
+	/**
+	 * Method is required by the interface
+	 *
+	 * @return array of key-value pairs of all available methods
+	 */
     public function getAllowedMethods() {
-        return array('bring' => $this->getConfigData('name'));          //get name for the bring carrier
-    }
-
-    public function getBringShippingFee() {
-        //$orderPrice = Mage::registry('ordsubtotal');
-        $orderPrice = Mage::getModel('checkout/session')->getQuote()->getGrandTotal();        // get the total amount of the order
-        $orderWeight = Mage::registry('ordweight');                                       // get the order weight
-
-
-        if (Mage::getStoreConfig('carriers/smartsendbring/price') != "") {
-            $pickupShippingRates = unserialize(Mage::getStoreConfig('carriers/smartsendbring/price', Mage::app()->getStore()));      //unserializing the shipping rates from the shipping rate table
-        }
-
-        $rates = array();
-        if ($pickupShippingRates) {
-
-            foreach ($pickupShippingRates as $pickupShippingRate) {
-                if ($pickupShippingRate['orderminprice'] <= $orderPrice && $pickupShippingRate['ordermaxprice'] >= $orderPrice && $pickupShippingRate['orderminweight'] <= $orderWeight && $pickupShippingRate['ordermaxweight'] >= $orderWeight) {            //if weight and price is correct
-                    $rates[] = $pickupShippingRate['pickupshippingfee'];                   //add rate to array of rates
-                }
-            }
-
-            $cheapestexpensive = Mage::getStoreConfig('carriers/smartsendbring/cheapestexpensive', Mage::app()->getStore());       //get the 'Cheapest or most expensive' setting from the admin system config
-            if (!$cheapestexpensive) {
-                $cheapestexpensive = 0;   //default is the cheapest
-            }
-
-            if (!empty($rates)) {                                   //if at least one rate matches the order
-                if ($cheapestexpensive == 0) {
-                    return min($rates);               //return min price 
-                } elseif ($cheapestexpensive == 1) {
-                    return max($rates);                //return max price 
-                }
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        return Mage::getModel('logistics/shippingMethods')->getShippingMethodByCarrier( $this->_code );
     }
 
 }

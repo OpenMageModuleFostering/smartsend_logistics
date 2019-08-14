@@ -17,18 +17,26 @@
  * versions in the future. If you wish to customize the plugin for your
  * needs please refer to http://www.smartsend.dk
  *
- * @folder		/app/code/community/Smartsend/Logistics/Model/System/Pickup/Listformat.php
+ * @folder		/app/code/community/Smartsend/Logistics/Model/System/Postdanmark/Flexdelivery.php
  * @category	Smartsend
  * @package		Smartsend_Logistics
  * @author		Anders Bilfeldt
  * @url			www.smartsend.dk
  */
 
-class Smartsend_Logistics_Model_System_Pickup_Listformat extends Smartsend_Logistics_Model_System_Listformat {
+class Smartsend_Logistics_Model_System_Postdanmark_Flexdelivery extends Mage_Core_Model_Config_Data {
 
-    public function toOptionArray() {         //address list format for the admin system config
-        $opt[0] = array('value' => 0, 'label' => Mage::helper('adminhtml')->__("#Company, #Street, #Zipcode #City (#Carrier)"));
-        return  $opt + parent::toOptionArray();
+    public function toOptionArray()
+    {
+    	$carrier = 'smartsendpostdanmark';
+   		$shipping_methods = Mage::getModel('logistics/ShippingMethods')->getShippingMethodByCarrier( $carrier );
+   	
+   		$option_array = array();
+   		foreach($shipping_methods as $shipping_method_key => $shipping_method_value) {
+   			$option_array[] = array('value' => $carrier.'_'.$shipping_method_key, 'label' => $shipping_method_value);
+   		}
+
+    	return $option_array;
     }
 
 }
