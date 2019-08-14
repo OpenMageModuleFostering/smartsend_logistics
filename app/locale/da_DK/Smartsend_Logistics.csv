@@ -1,0 +1,95 @@
+Username, Brugernavn
+Licencekey, Licenskode
+Combine PDF files?, Kombiner PDF filer?
+Seperate pdf's, Opdel PDF'er
+Combine pdf's into one file, Saml PDF filer til én
+Method, Metode
+Min Price,Min pris
+Max Price,Maks pris
+Min Weight,Min vægt
+Max Weight,Maks vægt
+Shipping Fee,Fragt pris
+Countries, Lande
+Add Rate,Tilføj Rate
+Enabled,Aktiveret
+Disabled,Deaktiveret
+Delete,Slet
+the order confirmation email was sent,ordrebekræftelses e-mail blev sendt
+the order confirmation email was not sent,ordrebekræftelses e-mail blev ikke sendt
+Order Date,Ordre dato
+Order Status,Ordrestatus
+Purchased From,Indkøbt fra
+Link to the New Order,Link til den nye orden
+Link to the Previous Order,Link til den tidligere ordre
+Placed from IP,Placeret fra IP
+Account Information,Kontooplysninger
+Customer Name,Kundenavn
+Email,Email
+Email notification,Email notifikation
+SMS notification,SMS notifikation
+Pre-notification,Pre-notifikation
+Return,Retur
+Return methode,Retur metode
+Which carrier should handle return packages?,Hvilket fragtfirma skal håndtere returpakker?
+Customer Group,Customer Group
+Billing Address,Faktureringsadresse
+Shipping Address,Leveringsadresse
+Smart Send Pickup Address,Smart Send Afhentningsadresse
+Pickup Point Id: ,Afhentnings ID:
+Shipping Method: ,Forsendelses Metode:
+Record not found,Optag ikke fundet
+Choose Store Location:,Vælg afhentningssted:
+Select Store..,Vælg afhentningssted..
+"Sorry, no quotes are available for this order at this time.","Beklager, ingen fragtpris er til rådighed for denne ordre på nuværende tidspunkt."
+Incl. Tax,Inkl. Moms
+Title,Titel
+Carrier Title,Titel på fragtfirma
+Method Name,Metode navn
+Consumer ID,Forbruger ID
+Price,Pris
+Cheapest or most expensive?,Billigste eller dyreste?
+Cheapest, Billigste
+Most Expensive, Dyreste
+PDF file, PDF fil
+Yes, Ja
+No, Nej
+Displayed Error Message,Vist fejlmeddelelse
+Timeout,Timeout
+Number Of Results,Antal resultater
+Dropdown format,Dropdown format
+"This shipping method is currently unavailable.####### If you would like to ship using this shipping method, please contact us.","Denne forsendelsesmetode er ikke tilgængelig i øjeblikket . ####### Hvis du ønsker at sende ved hjælp af denne forsendelsesmetode , så kontakt os."
+Closest Pickup,Nærmeste afhentningssted
+Small,Lille
+Medium,Medium
+Large,Stor
+Delivered to closest pickup point, Leveres til nærmeste afhentningssted
+Username and licencekey must be entered in settings, Brugernavn og licenskode skal indtastes i indstillingerne før brug
+Unknown carrier, Ukendt fragtmetode
+No orders selected, Ingen ordre valgt
+Method not yet implemented, Metoden er ikke implementeret endnu
+Trying to send empty order array, Prøver at sende et tomt order array
+An error occurred while sending order, En fejl opstod mens ordren blev sendt
+Response, Svar
+Unknown status, Ukendt status
+Unknown content type, Ukendt indholds format
+Had shipments, Havde forsendelser
+Unknown pickup method, Ukendt pickup metode
+Unable to fetch pickup data, Kunne ikke læse data om pickup
+Not a pickup shipping method, Ikke en pickup forsendelsesmetode
+Unsupported carrier, Ikke understøttet fragtfirma
+Unsupported shipping method, Ikke understøttet forsendelses metode
+Unknown carrier, Ukendt fragtfirma
+Unknown carrier when adding services, Ukendt fragtfirma ved tilføjelse af service
+Generate label, Lav label
+Generate return label, Lav retur label,
+How the dropdown is formatted, Formatet af dropdown listen
+Carrier is excluded from TAX even though there is a Shipping Tax defined, Der udregnes ikke moms af fragten selvom der er defineret en moms for fragt
+Order has no shipments without trace code and cannot be shipped, Ordren har ikke en forsendelse uden track&trace kode
+Failed to insert tracecode, Kunne ikke indsætte track and trace kode
+Unable to determine carrier for pickup shipping method, Kunne ikke bestemme fragtfirma for pickup forsendelsesmetode
+No items that could be shipped, Ingen produkter kunne sendes
+Shipping to closest pickup point, Sendes til nærmeste afhentningssted
+"Either just an id or a semicolon separated list of 'country,id' (* is all countries). Eg: SE,123;NO,321;*,44", "Enten blot et id eller en semikolon separeret liste af 'land,id' (* er all lande). Fx: SE,123;NO,321;*,44"
+No parcels without trace code, Ingen forsendelser uden tracking nummer
+No unshipped items, Ingen usendte varer
+No parcels to ship, Ingen varer kan sendes

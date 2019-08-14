@@ -1,0 +1,88 @@
+<?php
+/**
+ * Smartsend_Logistics
+ *
+ * This source file is subject to the GNU General Public License v3.0
+ * that is bundled with this package in the file license.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.html
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@smartsend.dk so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade the plugin to newer
+ * versions in the future. If you wish to customize the plugin for your
+ * needs please refer to http://www.smartsend.dk
+ *
+ * @folder		/app/design/adminhtml/default/default/template/logistics/sales/order/view/info.phtml
+ * @category	Smartsend
+ * @package		Smartsend_Logistics
+ * @author		Anders Bilfeldt
+ * @url			www.smartsend.dk
+ */
+$_order = $this->getOrder();
+
+if(strrpos($_order->getShippingMethod(), "smartsend") !== FALSE):
+
+//if ($_order->getShippingMethod() == "smartsendpickup_pickup" || $_order->getShippingMethod() == "smartsendposten_pickup" || $_order->getShippingMethod() == "smartsendpostdanmark_pickup" || $_order->getShippingMethod() == "smartsendbring_pickup" || $_order->getShippingMethod() == "smartsendgls_pickup" || $_order->getShippingMethod() == "smartsendswipbox_pickup"):
+    ?>
+    <div class="box-left">
+        <!--Smart Send Pickup-->
+        <div class="entry-edit">
+            <div class="entry-edit-head">
+                <h4 class="icon-head"><?php echo $this->__('Smart Send Logistics') ?></h4>
+            </div>
+            <fieldset>
+            	<div style="float: left" >
+            		<?php echo $this->__('Shipping method').': '.$_order->getShippingMethod(); ?>
+                </div>   
+                <div class="clear"></div>
+        <?php
+        	if(($temp = strlen($_order->getShippingMethod()) - strlen('pickup')) >= 0 && strpos($_order->getShippingMethod(), 'pickup', $temp) !== FALSE) {
+        
+                $order_id = $_order->getId();                                             //order id
+                if ($_order->getShippingMethod() == "smartsendgls_pickup") {      //smartsend shipping address
+                    $pickupModel = Mage::getModel('logistics/gls');
+                } elseif ($_order->getShippingMethod() == "smartsendswipbox_pickup") {
+                    $pickupModel = Mage::getModel('logistics/swipbox');
+                } elseif ($_order->getShippingMethod() == "smartsendpostdanmark_pickup") {
+                    $pickupModel = Mage::getModel('logistics/postdanmark');
+                } elseif ($_order->getShippingMethod() == "smartsendposten_pickup") {
+                    $pickupModel = Mage::getModel('logistics/posten');
+                } elseif ($_order->getShippingMethod() == "smartsendbring_pickup") {
+                    $pickupModel = Mage::getModel('logistics/bring');
+                } elseif ($_order->getShippingMethod() == "smartsendpickup_pickup") {
+                    $pickupModel = Mage::getModel('logistics/pickup');
+                }
+
+                if ($pickupModel) {
+                    $pickupData = $pickupModel->getCollection()->addFieldToFilter('order_id', $order_id)->getFirstItem();        //pickup data 
+
+                    if ($pickupData->getData()) {
+                    	if($pickupData->getPickUpId() != '' && $pickupData->getPickUpId() != '000') {
+                        	echo $this->__("Carrier") . ": ".$pickupData->getCarrier() . "<br><br>";
+                        	echo $this->__("Pickup Point Id") . ": " . $pickupData->getPickUpId() . "<br>";                      //pickup id         
+                            echo $pickupData->getCompany() . "<br>" . $pickupData->getStreet() . "<br>" . $pickupData->getZip() . " " . $pickupData->getCity() . "<br>" . $pickupData->getCountry();            //pickup address
+						} else {
+							echo $this->__("Shipping to closest pickup point");
+						}
+        			} else {
+           				echo $this->__("Record not found");
+        			}
+    			}
+    		} else {
+    			echo $this->__("Not a pickup point");
+    		}
+    	?>
+    			<div style="float: right" >
+                	<input type="button" class="form-button" value="<?php echo Mage::helper('logistics')->__('Generate label') ?>" title="<?php echo Mage::helper('logistics')->__('Generate label') ?>" onclick="setLocation('<?php echo $this->getUrl("logistics/logistics/label",array('order_id' => $_order->getId())); ?>')"/>
+					<input type="button" class="form-button" value="<?php echo Mage::helper('logistics')->__('Generate return label') ?>" title="<?php echo Mage::helper('logistics')->__('Generate return label') ?>" onclick="setLocation('<?php echo $this->getUrl("logistics/logistics/labelreturn",array('order_id' => $_order->getId())); ?>')" />
+                </div>   
+                <div class="clear"></div>
+            </fieldset>
+        </div>
+    </div>
+    <div class="clear"></div>
+<?php endif; ?>

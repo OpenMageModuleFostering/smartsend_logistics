@@ -1,0 +1,16 @@
+{
+    "name": "OpenMageModuleFostering/Smartsend_Logistics",
+    "type": "magento-module",
+    "license": "GPL",
+    "homepage": "",
+    "description": "Shipping methods for Post Danmark, GLS, Bring, SwipBox and Posten.",
+    "authors": [
+    {
+        "name": "Smart Send ApS",
+        "email": "anders@smartsend.dk"
+    }
+],
+    "suggest": {
+        "magento-hackathon/magento-composer-installer": "*"
+    }
+}

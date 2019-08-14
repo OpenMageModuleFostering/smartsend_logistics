@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<layout version="0.1.0">
+    <logistics_adminhtml_pickup_index>
+        <reference name="content">
+            <block type="logistics/adminhtml_pickup" name="logistics" >   
+            </block>
+        </reference>
+    </logistics_adminhtml_pickup_index>
+    <logistics_adminhtml_shipping_index>
+        <reference name="content">
+            <block type="logistics/adminhtml_shipping" name="shipping">
+            </block>
+        </reference>
+    </logistics_adminhtml_shipping_index>
+    <adminhtml_sales_order_view>                  <!-- sales order view update -->
+        <reference name="order_info">
+            <action method="setTemplate">
+                <template>logistics/sales/order/view/info.phtml</template>
+            </action> 
+        </reference>
+
+        <reference name="sales_order_tabs">
+ <block type="logistics/adminhtml_sales_order_view_tab_info" name="logistics_order_view_info_tab" template="logistics/sales/order/view/tab/info.phtml" >
+</block>
+                   
+    
+            <action method="addTab"><name>smart_send_pickup</name><block>logistics_order_view_info_tab</block></action>
+        </reference>
+   </adminhtml_sales_order_view>
+
+      
+            
+            
+        
+  
+</layout>
