@@ -23,11 +23,14 @@
  *
  * @class		Smartsend_Logistics_Model_Order
  * @folder		/app/code/community/Smartsend/Logistics/Model/Order.php
- * @category	Smartsend
+ * @category	Smart Send
  * @package		Smartsend_Logistics
- * @author		Smart Send
- * @url			www.smartsend.dk
- * @version		7.1.0
+ * @author 		Smart Send ApS
+ * @url			http://smartsend.dk/
+ * @copyright	Copyright (c) Smart Send ApS (http://www.smartsend.dk)
+ * @license		http://smartsend.dk/license
+ * @since		Class available since Release 7.1.0
+ * @version		Release: 7.1.2
  *
  *	// Overall functions
  *	public function _construct()
@@ -191,13 +194,17 @@ class Smartsend_Logistics_Model_Order extends Mage_Core_Model_Abstract {
 	* @return boolean
 	*/
 	public function isSmartsend() {
+		
+		try {
+			$method = strtolower($this->getShippingId());
 	
-		$method = strtolower($this->getShippingId());
-	
-		//Check if shipping methode starts with 'smartsend'
-		if(substr($method, 0, strlen('smartsend')) === 'smartsend') {
-			return true;
-		} else {
+			//Check if shipping methode starts with 'smartsend'
+			if(strpos($method, 'smartsend') !== false) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch(Exception $e) {
 			return false;
 		}
 	
@@ -210,14 +217,18 @@ class Smartsend_Logistics_Model_Order extends Mage_Core_Model_Abstract {
 	*/
 	public function isVconnect() {
 	
-		$method = strtolower($this->getShippingId());
+		try{
+			$method = strtolower($this->getShippingId());
 	
-		//Check if shipping methode starts with 'vconnect' or 'vc'
-		if(substr($method, 0, strlen('vconnect')) === 'vconnect') {
-			return true;
-		} elseif(substr($method, 0, strlen('vc')) === 'vc') {
-			return true;
-		} else {
+			//Check if shipping methode starts with 'vconnect' or 'vc'
+			if(strpos($method, 'vconnect') !== false) {
+				return true;
+			} elseif(strpos($method, 'vc') !== false) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch(Exception $e) {
 			return false;
 		}
 	
@@ -229,17 +240,20 @@ class Smartsend_Logistics_Model_Order extends Mage_Core_Model_Abstract {
 	* @return boolean
 	*/	
 	public function isPickupSmartsend() {
+		try{
+			if($this->isSmartsend() == true) {
+				$method = $this->getShippingMethod();
 	
-		if($this->isSmartsend() == true) {
-			$method = $this->getShippingMethod();
-	
-			//Check if shipping methode ends with 'pickup'
-			if(substr($method, -strlen('pickup')) === 'pickup') {
-				return true;
+				//Check if shipping methode ends with 'pickup'
+				if(substr($method, -strlen('pickup')) === 'pickup') {
+					return true;
+				} else {
+					return false;
+				}
 			} else {
 				return false;
 			}
-		} else {
+		} catch(Exception $e) {
 			return false;
 		}
 	
@@ -252,16 +266,21 @@ class Smartsend_Logistics_Model_Order extends Mage_Core_Model_Abstract {
 	*/	
 	public function isPickupVconnect() {
 	
-		if($this->isVconnect() == true) {
-			$method = $this->getShippingMethod();
+		try{
+			if($this->isVconnect() == true) {
+				$method = $this->getShippingMethod();
 	
-			//Check if shipping methode ends with 'pickup'
-			if(substr($method, -strlen('pickup')) === 'pickup') {
-				return true;
+				//Check if shipping methode ends with 'pickup'
+				if(substr($method, -strlen('pickup')) === 'pickup') {
+					return true;
+				} else {
+					return false;
+				}
 			} else {
 				return false;
 			}
-		} else {
+		
+		} catch(Exception $e) {
 			return false;
 		}
 	}
@@ -358,42 +377,37 @@ class Smartsend_Logistics_Model_Order extends Mage_Core_Model_Abstract {
 		$shipping_string = strtolower($shipping_string);
 	
 	// Smart Send shipping methods
-		if(substr($shipping_string, 0, strlen('smartsendpickup')) === 'smartsendpickup' || substr($shipping_string, 0, strlen('smartsend_pickup')) === 'smartsend_pickup') {
-			$carrier = $this->getPickupCarrier();
-			if(!isset($carrier) || $carrier == '') {
-				throw new Exception($this->_errors[2304]);
-			}
-		} elseif(substr($shipping_string, 0, strlen('smartsendbring')) === 'smartsendbring' || substr($shipping_string, 0, strlen('smartsend_bring')) === 'smartsend_bring') {
+		if(strpos($shipping_string,'smartsendbring') !== false || strpos($shipping_string,'smartsend_bring') !== false) {
 			$carrier = 'bring';
-		} elseif(substr($shipping_string, 0, strlen('smartsendgls')) === 'smartsendgls' || substr($shipping_string, 0, strlen('smartsend_gls')) === 'smartsend_gls') {
+		} elseif(strpos($shipping_string,'smartsendgls') !== false || strpos($shipping_string,'smartsend_gls') !== false) {
 			$carrier = 'gls';
-		} elseif(substr($shipping_string, 0, strlen('smartsendpostdanmark')) === 'smartsendpostdanmark' || substr($shipping_string, 0, strlen('smartsend_postdanmark')) === 'smartsend_postdanmark') {
+		} elseif(strpos($shipping_string,'smartsendpostdanmark') !== false || strpos($shipping_string,'smartsend_postdanmark') !== false) {
 			$carrier = 'postdanmark';
-		} elseif(substr($shipping_string, 0, strlen('smartsendposten')) === 'smartsendposten' || substr($shipping_string, 0, strlen('smartsend_posten')) === 'smartsend_posten') {
+		} elseif(strpos($shipping_string,'smartsendposten') !== false || strpos($shipping_string,'smartsend_posten') !== false) {
 			$carrier = 'posten';
 			
 	// vConnect All-in-1 module shipping methods
-		} elseif(substr($shipping_string, 0, strlen('vconnect_postnord_dk')) === 'vconnect_postnord_dk') {
+		} elseif(strpos($shipping_string,'vconnect_postnord_dk') !== false) {
 			$carrier = 'postdanmark';
-		} elseif(substr($shipping_string, 0, strlen('vconnect_postnord_se')) === 'vconnect_postnord_se') {
+		} elseif(strpos($shipping_string,'vconnect_postnord_se') !== false) {
 			$carrier = 'posten';
-		} elseif(substr($shipping_string, 0, strlen('vconnect_postnord_no')) === 'vconnect_postnord_no') {
+		} elseif(strpos($shipping_string,'vconnect_postnord_no') !== false) {
 			$carrier = 'postnordnorway';
-		} elseif(substr($shipping_string, 0, strlen('vconnect_postnord_fi')) === 'vconnect_postnord_fi') {
+		} elseif(strpos($shipping_string,'vconnect_postnord_fi') !== false) {
 			$carrier = 'postnordfinland';
 			
 	// Old vConnect shipping methods
-		} elseif(substr($shipping_string, 0, strlen('vconnect_postdanmark')) === 'vconnect_postdanmark' || substr($shipping_string, 0, strlen('vc_postdanmark')) === 'vc_postdanmark' || substr($shipping_string, 0, strlen('vc_allinone_vconnectpostdanmark')) === 'vc_allinone_vconnectpostdanmark') {
+		} elseif(strpos($shipping_string,'vconnect_postdanmark') !== false || strpos($shipping_string,'vc_postdanmark') !== false || strpos($shipping_string,'vc_allinone_vconnectpostdanmark') !== false) {
 			$carrier = 'postdanmark';
-		} elseif(substr($shipping_string, 0, strlen('vconnect_posten')) === 'vconnect_posten' || substr($shipping_string, 0, strlen('vc_posten')) === 'vc_posten' || substr($shipping_string, 0, strlen('vc_allinone_vconnectposten')) === 'vc_allinone_vconnectposten') {
+		} elseif(strpos($shipping_string,'vconnect_posten') !== false || strpos($shipping_string,'vc_posten') !== false || strpos($shipping_string,'vc_allinone_vconnectposten') !== false) {
 			$carrier = 'posten';
-		} elseif(substr($shipping_string, 0, strlen('vconnect_postnord')) === 'vconnect_postnord' || substr($shipping_string, 0, strlen('vc_postnord')) === 'vc_postnord' || substr($shipping_string, 0, strlen('vc_allinone_vconnectpostnord')) === 'vc_allinone_vconnectpostnord') {
+		} elseif(strpos($shipping_string,'vconnect_postnord') !== false || strpos($shipping_string,'vc_postnord') !== false || strpos($shipping_string,'vc_allinone_vconnectpostnord') !== false) {
 			$carrier = 'postdanmark';
-		} elseif(substr($shipping_string, 0, strlen('vconnect_gls')) === 'vconnect_gls' || substr($shipping_string, 0, strlen('vc_gls')) === 'vc_gls') {
+		} elseif(strpos($shipping_string,'vconnect_gls') !== false || strpos($shipping_string,'vc_gls') !== false) {
 			$carrier = 'gls';
-		} elseif(substr($shipping_string, 0, strlen('vconnect_bring')) === 'vconnect_bring' || substr($shipping_string, 0, strlen('vc_bring')) === 'vc_bring') {
+		} elseif(strpos($shipping_string,'vconnect_bring') !== false || strpos($shipping_string,'vc_bring') === false) {
 			$carrier = 'bring';
-		} elseif(substr($shipping_string, 0, strlen('vconnect_pdkalpha')) === 'vconnect_pdkalpha') {
+		} elseif(strpos($shipping_string,'vconnect_pdkalpha') !== false) {
 			$carrier = 'postdanmark';
 			
 	// If the shipping method is unknown throw an error
@@ -726,7 +740,7 @@ class Smartsend_Logistics_Model_Order extends Mage_Core_Model_Abstract {
 			}
 		} else {
 			if($this->getUnshippedItems() != null) {
-				$this->createShipment();
+				$this->addParcelWithUnshippedItems();
 			} else {
 				throw new Exception( $this->_errors[2402] );
 			}

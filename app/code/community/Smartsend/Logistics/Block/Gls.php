@@ -28,26 +28,29 @@ class Smartsend_Logistics_Block_Gls extends Mage_Checkout_Block_Onepage_Shipping
     public function __construct() {
         $this->setTemplate('logistics/pickup.phtml'); // pickup points for gls	
     }
-          
+
     public function getPickupData() {
-        $checkOut 	= Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress();         //getting shipping address from checkout quote
-        
-        $street 	= $checkOut->getStreet();
-        $street 	= implode(' ', $street);             // splitting the street by " "(space)
-        $city 		= $checkOut->getCity();
-        $postcode 	= $checkOut->getPostcode();
-        $country 	= $checkOut->getCountry();
-        $carriers 	= 'gls';
+        if (Mage::app()->getStore()->isAdmin()) {
+            $checkOut = Mage::getSingleton('adminhtml/session_quote')->getQuote()->getShippingAddress();         //getting shipping address from admin checkout quote
+        } else {
+            $checkOut = Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress();         //getting shipping address from  frontend checkout quote
+        }
+        $street = $checkOut->getStreet();
+        $street = implode(' ', $street);             // splitting the street by " "(space)
+        $city = $checkOut->getCity();
+        $postcode = $checkOut->getPostcode();
+        $country = $checkOut->getCountry();
+        $carriers = 'gls';
 
         $pickup = Mage::getModel('logistics/api_pickups');
-        
-        $pickup->_post($street, $city, $postcode, $country,$carriers);        // get the pickup points for the postdanmark carrier
 
-		if($pickup->getPickupPoints() != false) {
-			return $pickup->getPickupPoints();
-		} else {
-			return false;
-		}
+        $pickup->_post($street, $city, $postcode, $country, $carriers);        // get the pickup points for the postdanmark carrier
+
+        if ($pickup->getPickupPoints() != false) {
+            return $pickup->getPickupPoints();
+        } else {
+            return false;
+        }
     }
 
 }

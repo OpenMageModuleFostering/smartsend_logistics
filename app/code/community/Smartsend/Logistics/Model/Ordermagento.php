@@ -1,10 +1,9 @@
 <?php
 
 /**
- * Smartsend_Logistics Order class
+ * Smartsend_Logistics Order Magento class
  *
  * Create order objects that is included in the final Smart Send label API callout.
- * These are the CMS dependent functions that is used by the order class.
  *
  * LICENSE
  *
@@ -22,18 +21,19 @@
  * versions in the future. If you wish to customize the plugin for your
  * needs please refer to http://www.smartsend.dk
  *
- *
  * @class		Smartsend_Logistics_Model_Ordermagento
  * @folder		/app/code/community/Smartsend/Logistics/Model/Ordermagento.php
- * @category	Smartsend
+ * @category	Smart Send
  * @package		Smartsend_Logistics
- * @author		Smart Send
- * @url			www.smartsend.dk
- * @version		7.1.0
+ * @author 		Smart Send ApS
+ * @url			http://smartsend.dk/
+ * @copyright	Copyright (c) Smart Send ApS (http://www.smartsend.dk)
+ * @license		http://smartsend.dk/license
+ * @since		Class available since Release 7.1.0
+ * @version		Release: 7.1.3.0
  *
  *	// Order
  *	public function getShippingId()
- *	public function getPickupCarrier()
  *	public function getOrderId()
  *	public function getOrderReference()
  *	public function getOrderPriceTotal()
@@ -58,8 +58,9 @@
  *	public function getShipmentTrace($shipment)
  *	public function getShipmentWeight($shipment)
  *	protected function getUnshippedItems()
- *	protected function createShipment()
+ *	public function createShipment($tracking_number)
  *	protected function addShipment($shipment)
+ *	protected function addParcelWithUnshippedItems()
  *	protected function addItem($item)
  *	
  */
@@ -108,25 +109,6 @@ class Smartsend_Logistics_Model_Ordermagento extends Smartsend_Logistics_Model_O
 		
 		return $shipMethod_id; //return unique id of shipping method
 	
-	}
-
-	/**
-	* 
-	* Get carrier name based on the pickup information.
-	* Used if the shipping method is 'closest pickup point'
-	* @return string
-	* ## Depricted function ##
-	*/
-	public function getPickupCarrier() {
-	/*
-		$pickupModel = Mage::getModel('logistics/pickup');
-		$pickupData = $pickupModel->getCollection()->addFieldToFilter('order_id', $this->_order->getOrderId() )->getFirstItem();        //pickup data 
-		if ($pickupData->getData()) {
-			$carrier = $pickupData->getCarrier();
-		} else {
-			$carrier = null;
-		}
-	*/
 	}
  
  	/**
@@ -588,7 +570,11 @@ class Smartsend_Logistics_Model_Ordermagento extends Smartsend_Logistics_Model_O
 					- $eachOrderItem->getQtyRefunded()
 					- $eachOrderItem->getQtyCanceled();
 			if($Itemqty > 0) {
-				$items[$eachOrderItem->getId()] = $Itemqty;
+				$items[] = array(
+					'id'		=> $eachOrderItem->getId(),
+					'productid'	=> $eachOrderItem->getProductId(),
+					'quantity'	=> $Itemqty
+					);
 			}
 		}
 
@@ -605,10 +591,20 @@ class Smartsend_Logistics_Model_Ordermagento extends Smartsend_Logistics_Model_O
 	* Create a parcel containing all unshipped items.
 	* Add the parcel to the request.
 	*/
-	protected function createShipment() {
+	public function createShipment($tracking_number=null) {
 
 		$order = $this->_order;
-		$qty = $this->getUnshippedItems();
+		$unshipped_items = $this->getUnshippedItems();
+		
+		// Create array with id's and quantities of unshipped items
+		if(is_array($itemsarray)) {
+			$itemsarray = array();
+			foreach($unshipped_items as $item) {
+				$itemsarray[$item['id']] = $item['quantity'];
+			}
+		} else {
+			$itemsarray = null;
+		}
 
 		/* check order shipment is prossiable or not */
 
@@ -617,14 +613,28 @@ class Smartsend_Logistics_Model_Ordermagento extends Smartsend_Logistics_Model_O
 		$comment = "";
 
 		if ($order->canShip()) {
-			// @var $shipment Mage_Sales_Model_Order_Shipment
-			// prepare to create shipment
-			$shipment = Mage::getModel('sales/service_order', $order)->prepareShipment($qty);
-			if ($shipment) {
-				$shipment->register();
+          
+			$shipmentId = Mage::getModel('sales/order_shipment_api')->create(
+				$order->getIncrementId(), //(string) orderIncrementId - Order increment ID
+				$itemsarray, //(array) itemsQty - Array of orderItemIdQty (optional)
+				$comment, //(string) comment - Shipment comment (optional)
+				$email, //(int) email - Send email flag (optional)
+				$includeComment //(int) includeComment - Include comment in email flag (optional)
+				);
+		
+			if($shipmentId) {
+				//Add a tracecode if one is provided
+				if($tracking_number && $shipmentId) {
+					$carrier_code = 'smartsend'.$this->getShippingCarrier();
 				
-				//Add a comment. Second parameter is whether or not to email the comment to the user
-				$shipment->addComment($comment, $email && $includeComment);
+					$trackmodel = Mage::getModel('sales/order_shipment_api')
+					->addTrack(
+						$shipmentId, //(string) shipmentIncrementId - Shipment increment ID
+						$carrier_code, //(string) carrier - Carrier code (smartsendpostdanmark, smartsendgls)
+						$order->getShippingDescription(), //(string) title - Tracking title
+						$tracking_number //(string) trackNumber - Tracking number
+						);	
+				}
 				
 				// Set the order status as 'Processing'
 				$order->setIsInProcess($email);
@@ -632,28 +642,13 @@ class Smartsend_Logistics_Model_Ordermagento extends Smartsend_Logistics_Model_O
 				
 				try {
 					$transactionSave = Mage::getModel('core/resource_transaction')
-							->addObject($shipment)
 							->addObject($order)
 							->save();
 					
-					//Email the customer that the order is sent
-					$shipment->sendEmail($email, ($includeComment ? $comment : ''));
-					
-					//Set order status as complete
-					//$order->setData('state', Mage_Sales_Model_Order::STATE_COMPLETE);
-					//$order->setData('status', Mage_Sales_Model_Order::STATE_COMPLETE);
-					//$order->save();
-					
-					//var_dump($qty); exit();
 				} catch (Mage_Core_Exception $e) {
 					throw new Exception($this->_errors[2402].': '.$e);
 				}
 			}
-		}
-
-		if ($shipment) {
-			//Lastly add the shipment to the order array.
-			$this->addShipment($shipment);
 		}
 
 	}
@@ -683,6 +678,36 @@ class Smartsend_Logistics_Model_Ordermagento extends Smartsend_Logistics_Model_O
 	
 		$this->_parcels[] = $parcel;
 
+	}
+	
+	/*
+	 * Add a parcel to the request
+	 * The parcel contains all unshipped items
+	 */
+	protected function addParcelWithUnshippedItems() {
+		$unshipped_items = $this->getUnshippedItems();
+		
+		$parcel = array(
+			'shipdate'	=> null,
+			'reference' => $this->getOrderId(),
+			'weight'	=> 0,
+			'height'	=> null,
+			'width'		=> null,
+			'length'	=> null,
+			'size'		=> null,
+			'freetext1'	=> $this->getFreetext(),
+			'items' 	=> array(),
+			);
+			
+		foreach($unshipped_items as $item) {
+			$product = Mage::getModel('catalog/product')->load($item['productid']);
+			if( $product->getId() ) {
+				$parcel['weight'] =+ $item['quantity']*$product->getWeight();
+				$parcel['items'][] = $this->addItem($product);
+			}
+		}
+	
+		$this->_parcels[] = $parcel;
 	}
 
 	/**

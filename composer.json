@@ -3,7 +3,7 @@
     "type": "magento-module",
     "license": "GPL",
     "homepage": "",
-    "description": "Table rate shipping methods with flexible conditions determining the rate and even let the customer chose a pick-up point during checkout. Integrates the shipping methods directly with carrier systems and create PDF labels directly from the backend.",
+    "description": "Advanced table rate shipping module with flexible conditions determining the rate and pick-up point during checkout.",
     "authors": [
     {
         "name": "Smart Send ApS",

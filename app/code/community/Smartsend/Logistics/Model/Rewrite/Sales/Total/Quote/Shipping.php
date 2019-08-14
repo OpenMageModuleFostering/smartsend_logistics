@@ -28,6 +28,11 @@ class Smartsend_Logistics_Model_Rewrite_Sales_Total_Quote_Shipping extends Mage_
     public function collect(Mage_Sales_Model_Quote_Address $address) {
  
         $this->_setAddress($address);
+        
+        //Exit if no quote
+        if( !$address->hasQuote() ) {
+        	$this;
+        }
         /**
          * Reset amounts
          */
@@ -51,7 +56,11 @@ class Smartsend_Logistics_Model_Rewrite_Sales_Total_Quote_Shipping extends Mage_
 
 		$smartsend_exclude = false;
 
-        $shipping_method = Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress()->getShippingMethod();
+        if (Mage::app()->getStore()->isAdmin()) {
+            $shipping_method = Mage::getSingleton('adminhtml/session_quote')->getQuote()->getShippingAddress()->getShippingMethod();         //getting shipping method from admin checkout quote
+        } else {
+            $shipping_method = Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress()->getShippingMethod();               //getting shipping method from frontend checkout quote
+        } 
 
         if (substr($shipping_method, 0, strlen('smartsend')) === 'smartsend') {
             $carrier = explode('_', $shipping_method);

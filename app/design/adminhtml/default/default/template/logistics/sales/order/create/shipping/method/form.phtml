@@ -1,0 +1,320 @@
+<?php
+/**
+ * Smartsend_Logistics
+ *
+ * This source file is subject to the GNU General Public License v3.0
+ * that is bundled with this package in the file license.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.html
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@smartsend.dk so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade the plugin to newer
+ * versions in the future. If you wish to customize the plugin for your
+ * needs please refer to http://www.smartsend.dk
+ *
+ * @folder		/app/design/adminhtml/default/default/template/logistics/sales/order/create/shipping/method/form.phtml
+ * @category	Smartsend
+ * @package		Smartsend_Logistics
+ * @author		Anders Bilfeldt
+ * @url			www.smartsend.dk
+ */ ?>
+<script type="text/javascript">
+jQuery(document).ready(function() {
+             
+            hideShippingAll();
+            jQuery('input[type="radio"][name="order[shipping_method]"][class="smartsend"]').click(function() {
+                jQuery.session.set('pickup','');
+                jQuery.session.set('flex','');
+                hideShippingAll();
+                var code = jQuery(this).val();
+                if (jQuery(this).is(':checked')) {
+                    if(jQuery("[id='" + 'shipping_form_' + code + "']").length != 0){
+                    showShipping(code);
+                }else{
+                  order.setShippingMethod(jQuery(this).val())
+            }
+                }
+            });
+            jQuery('input[type="radio"][name="order[shipping_method]"][class="smartsend"]').each(function() {
+                var code = jQuery(this).val();
+                if (jQuery(this).is(":checked")) {
+                    showShipping(code);
+                }
+            });
+            
+            jQuery("input[name='order[shipping_method]']").last().addClass('validate-one-required-by-name');
+        });
+        
+        function pickupSelect(pickup){
+            if(jQuery(pickup).is(':visible')){
+            str=pickup.name;
+            var flex = str.replace("shipping_pickup", "shipping_flex");
+              $is_selected=false;
+            if(jQuery('[name="'+flex+'"]').length ){
+                
+                 if(jQuery('[name="'+flex+'"]').val() && pickup.value){
+                
+                      jQuery.session.set('pickup',pickup.name+"?--?"+pickup.value);
+                      jQuery.session.set('flex',flex+"?--?"+jQuery('[name="'+flex+'"]').val());
+
+                    order.setShippingMethod(jQuery('select[name="'+pickup.name+'"]').parents('ul').parents('li').find('input[name="order[shipping_method]"]').val());
+                }
+               $is_selected=true;
+            }else{
+                if(pickup.value){
+  
+                                           jQuery.session.set('pickup',pickup.name+"?--?"+pickup.value);
+
+                    order.setShippingMethod(jQuery('select[name="'+pickup.name+'"]').parents('ul').parents('li').find('input[name="order[shipping_method]"]').val());
+                }
+                  $is_selected=true;
+            }
+            }   
+        }
+        
+        function flexSelect(flex){
+                        if(jQuery(flex).is(':visible')){
+
+                     str=flex.name;
+            var pickup = str.replace("shipping_flex", "shipping_pickup"); 
+                $is_selected=false;
+            if(jQuery('[name="'+pickup+'"]').length){
+                 if(jQuery('[name="'+pickup+'"]').val() &&  flex.value ){
+                  jQuery.session.set('flex',flex.name+"?--?"+flex.value);
+                      jQuery.session.set('pickup',pickup+"?--?"+jQuery('[name="'+pickup+'"]').val());
+
+                    order.setShippingMethod(jQuery('select[name="'+flex.name+'"]').parents('ul').parents('li').find('input[name="order[shipping_method]"]').val());
+                }
+                   $is_selected=true;
+            }else{
+                if(flex.value){
+                             jQuery.session.set('flex',flex.name+"?--?"+flex.value);
+                          
+
+                    order.setShippingMethod(jQuery('select[name="'+flex.name+'"]').parents('ul').parents('li').find('input[name="order[shipping_method]"]').val());
+                }
+               $is_selected=true;
+            }
+        }
+    }
+        
+        
+        function showShipping(code) {
+            if (jQuery("[id='" + 'shipping_form_' + code + "']").length != 0) {
+                jQuery("[id='" + 'shipping_form_' + code + "']").show();
+                jQuery(this).find('.required-entry').attr('disabled', 'false');
+                jQuery("[id='" + 'shipping_form_' + code + "']").parent('li').find('.flex-delivery').addClass('required-entry');
+                jQuery("[id='" + 'shipping_form_' + code + "']").parent('li').find('.pickup-delivery').addClass('required-entry');
+ 
+            }
+        }
+        function hideShippingAll() {
+            jQuery('input[type="radio"][name="order[shipping_method]"]').each(function() {
+                var code = jQuery(this).val();
+                jQuery("[id='" + 'shipping_form_' + code + "']").hide();
+                jQuery(this).find('.required-entry').attr('disabled', 'true');
+                jQuery(this).parent('li').find('.required-entry').removeClass('required-entry');
+                jQuery(this).parent('li').find('.validation-advice').remove();
+            });
+        }
+    </script>
+<?php /** @var $this Mage_Adminhtml_Block_Sales_Order_Create_Shipping_Method_Form */ ?>
+<?php $_shippingRateGroups = $this->getShippingRates(); ?>
+<?php if ($_shippingRateGroups): ?>
+    <div id="order-shipping-method-choose" style="display:none">
+        <dl class="shipment-methods">
+            <?php foreach ($_shippingRateGroups as $code => $_rates): ?>
+                <dt><strong><?php echo $this->escapeHtml($this->getCarrierName($code)) ?></strong></dt>
+                <dd>
+                    <ul>
+                        <?php foreach ($_rates as $_rate): ?>
+                            <?php $_code = $_rate->getCode() ?>
+                            <li>
+                                <?php if ($_rate->getErrorMessage()): ?>
+                                    <ul class="messages">
+                                        <li class="error-msg"><?php echo $this->escapeHtml($_rate->getErrorMessage()) ?></li>
+                                    </ul>
+                                <?php else: ?>
+                                    <?php
+                                    if (preg_match('/smartsend/i', $_code)) {
+                                        ?>
+                                          <?php $_radioProperty = 'name="order[shipping_method]" type="radio" ' ?>
+
+                                        <?php $_checked = $this->isMethodActive($_code) ? 'checked="checked"' : '' ?>
+                                <input <?php echo $_radioProperty ?> value="<?php echo $_code ?>" id="s_method_<?php echo $_code ?>" <?php echo $_checked ?> class="smartsend"/>
+                                        <label class="normal" for="s_method_<?php echo $_code ?>">
+                                            <?php echo $this->escapeHtml($_rate->getMethodTitle() ? $_rate->getMethodTitle() : $_rate->getMethodDescription()) ?> -
+                                            <strong>
+                                            <?php      $shipping_method = $_rate->getCode();
+                                            $carrier = explode('_', $shipping_method);
+                                            $smartsend_carrier = $carrier['0'];
+                                            $excludedMethod = Mage::getModel('logistics/shippingMethods')->excludedTax($shipping_method);
+
+                                            if (substr($shipping_method, 0, strlen('smartsend')) === 'smartsend' && Mage::getStoreConfig("carriers/" . $smartsend_carrier . "/excludetax") && $excludedMethod) {
+                                                ?>
+                                                    <?php $_excl = $this->getShippingPrice($_rate->getPrice(), 0); ?>   <!-- get shipping price excluding tax if shipping method does not contains tax -->
+                                                    <?php echo $_excl; ?>
+
+                                            
+                                                <?php }else{ ?>
+                                                <?php $_excl = $this->getShippingPrice($_rate->getPrice(), $this->helper('tax')->displayShippingPriceIncludingTax()); ?>
+                                                <?php $_incl = $this->getShippingPrice($_rate->getPrice(), true); ?>
+
+                                                <?php echo $_excl; ?>
+                                                <?php if ($this->helper('tax')->displayShippingBothPrices() && $_incl != $_excl): ?>
+                                                    (<?php echo $this->__('Incl. Tax'); ?> <?php echo $_incl; ?>)
+                                                <?php endif; ?>
+                                                     <?php
+                                            }
+                                            ?>
+                                            </strong>
+                                        </label><?php
+                                        $block = $this->getLayout()->createBlock('logistics/' . strtolower(str_replace(' ', '', $_rate->getCarrier_title())))->setData('rate', $_rate)->setTemplate('logistics/pickup.phtml');
+                                        echo $block->toHtml();
+                                    }else {
+                                        ?>
+                            <?php $_radioProperty = 'name="order[shipping_method]" type="radio" onclick="order.setShippingMethod(this.value)"' ?>
+
+                    <?php $_checked = $this->isMethodActive($_code) ? 'checked="checked"' : '' ?>
+                                        <input <?php echo $_radioProperty ?> value="<?php echo $_code ?>" id="s_method_<?php echo $_code ?>" <?php echo $_checked ?>/>
+                                        <label class="normal" for="s_method_<?php echo $_code ?>">
+                                                <?php echo $this->escapeHtml($_rate->getMethodTitle() ? $_rate->getMethodTitle() : $_rate->getMethodDescription()) ?> -
+                                            <strong>
+                                                <?php $_excl = $this->getShippingPrice($_rate->getPrice(), $this->helper('tax')->displayShippingPriceIncludingTax()); ?>
+                                                <?php $_incl = $this->getShippingPrice($_rate->getPrice(), true); ?>
+
+                                                <?php echo $_excl; ?>
+                                                <?php if ($this->helper('tax')->displayShippingBothPrices() && $_incl != $_excl): ?>
+                                                    (<?php echo $this->__('Incl. Tax'); ?> <?php echo $_incl; ?>)
+                    <?php endif; ?>
+                                            </strong>
+                                        </label>
+                                    <?php } ?>
+                            <?php endif ?>
+                            </li>
+        <?php endforeach; ?>
+                    </ul>
+                </dd>
+    <?php endforeach; ?>
+        </dl>
+    </div>
+    <?php if ($_rate = $this->getActiveMethodRate()): ?>
+        <div id="order-shipping-method-info">
+            <strong><?php echo $this->escapeHtml($this->getCarrierName($_rate->getCarrier())) ?></strong><br/>
+                <?php echo $this->escapeHtml($_rate->getMethodTitle() ? $_rate->getMethodTitle() : $_rate->getMethodDescription()) ?> -
+            <strong>
+                 <?php      $shipping_method = $_rate->getCode();
+                                            $carrier = explode('_', $shipping_method);
+                                            $smartsend_carrier = $carrier['0'];
+                                            $excludedMethod = Mage::getModel('logistics/shippingMethods')->excludedTax($shipping_method);
+
+                                            if (substr($shipping_method, 0, strlen('smartsend')) === 'smartsend' && Mage::getStoreConfig("carriers/" . $smartsend_carrier . "/excludetax") && $excludedMethod) {
+                                                ?>
+                                                    <?php $_excl = $this->getShippingPrice($_rate->getPrice(), 0); ?>   <!-- get shipping price excluding tax if shipping method does not contains tax -->
+                                                    <?php echo $_excl; ?>
+
+                                            
+                                                <?php }else{ ?>
+                <?php $_excl = $this->getShippingPrice($_rate->getPrice(), $this->helper('tax')->displayShippingPriceIncludingTax()); ?>
+                <?php $_incl = $this->getShippingPrice($_rate->getPrice(), true); ?>
+
+                <?php echo $_excl; ?>
+                <?php if ($this->helper('tax')->displayShippingBothPrices() && $_incl != $_excl): ?>
+                    (<?php echo $this->__('Incl. Tax'); ?> <?php echo $_incl; ?>)
+        <?php endif; ?>
+                        <?php }  ?>
+            </strong>
+            <!--input type="text" class="input-text" style="width:70px"/-->
+            <br/>
+            
+        <?php  
+        $_code = $_rate->getCode();
+        if (preg_match('/smartsend/i', $_code)) {
+        echo "<div class='pickup' style='display:none;margin-bottom:5px;'><span class='value' style='word-wrap: break-word;'></span>   </div>";
+        echo "<div class='flex' style='display:none;margin-bottom:5px;'> Flex delivery: <span class='value' style='word-wrap: break-word;'></span>  </div>";
+        ?>
+        <script type="text/javascript">
+        	// Add support for .contains for chrome
+			if (!String.prototype.contains) {
+    			String.prototype.contains = function(s) {
+        			return this.indexOf(s) > -1
+    			}
+			}
+        
+            if(jQuery.session.get('flex')){
+                flexresult= jQuery.session.get('flex').split('?--?');
+                if(flexresult[0].contains("<?php echo $_rate->getMethod()."]"; ?>")){
+                    jQuery('.flex .value').html(flexresult[1]);
+                    jQuery("select[name='"+flexresult[0]+"']").val(flexresult[1]).change();
+                    jQuery('.flex').show();
+                }
+            }
+            if(jQuery.session.get('pickup')){
+                pickupresult= jQuery.session.get('pickup').split('?--?');
+                if(pickupresult[0].contains("<?php echo $_rate->getMethod()."]"; ?>")){
+                    comm=1;
+                    str=[''];
+                    i=0;
+                    jQuery.each(pickupresult[1], function (ind, c) {
+                        if(c=='"'){
+                            comm=comm+1;
+                            if (comm % 2 !== 0) { 
+                                i=i+1;
+                                str[i]='';
+                            }
+                        }
+                        if (comm % 2 === 0  && c!='"') {
+                            str[i]=str[i]+c;
+                        }
+                    });
+                    pickup_array={};
+                    jQuery.each(str, function (k, v) {
+                      
+                      if (k % 2 != 0 ) {
+                            pickup_array[str[k-1]] =v;
+                        } 
+                    });
+                    pickup_html="<br>"+pickup_array['company']+"<br>"+pickup_array['street']+"<br>"+pickup_array['zipcode']+" "+pickup_array['city']+"<br>Pickup point id:  "+pickup_array['pick_up_id'];  
+                    jQuery("select[name='"+pickupresult[0]+"']").val(pickupresult[1]).change();
+                    jQuery('.pickup .value').html(pickup_html);
+                    jQuery('.pickup').show();
+                }
+            }
+                 
+            
+        </script>
+            
+        <?php  } ?>
+              
+            <a href="#" onclick="$('order-shipping-method-info').hide();
+                            $('order-shipping-method-choose').show();
+                            return false">
+        <?php echo Mage::helper('sales')->__('Click to change shipping method') ?>
+            </a>
+        </div>
+    <?php else: ?>
+        <script type="text/javascript">$('order-shipping-method-choose').show();</script>
+    <?php endif; ?>
+<?php elseif ($this->getIsRateRequest()): ?>
+    <strong><?php echo Mage::helper('sales')->__('Sorry, no quotes are available for this order at this time.') ?></strong>
+<?php else: ?>
+    <div id="order-shipping-method-summary">
+        <a href="#" onclick="order.loadShippingRates();
+                    return false">
+    <?php echo Mage::helper('sales')->__('Get shipping methods and rates') ?>
+        </a>
+        <input type="hidden" name="order[has_shipping]" value="" class="required-entry" />
+    </div>
+<?php endif; ?>
+<div style="display:none;" id="shipping-method-overlay" class="overlay"><span><?php echo $this->__('Shipping method selection is not applicable') ?></span></div>
+<script type="text/javascript">
+    order.overlay('shipping-method-overlay', <?php if ($this->getQuote()->isVirtual()): ?>false<?php else: ?>true<?php endif; ?>);
+        order.overlay('address-shipping-overlay', <?php if ($this->getQuote()->isVirtual()): ?>false<?php else: ?>true<?php endif; ?>);
+</script>
+
+ 
+      

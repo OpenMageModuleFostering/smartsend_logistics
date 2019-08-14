@@ -169,7 +169,7 @@ class Smartsend_Logistics_LogisticsController extends Mage_Adminhtml_Controller_
 		if( $label->hasRequestOrders() ) {
 			try{
 				$label->sendRequest();
-				$label->handleApiReponse($show_individual_succes);
+				$label->handleApiReponse();
 			} catch(Exception $e) {
 				$label->addErrorMessage( $e->getMessage() );
 			}

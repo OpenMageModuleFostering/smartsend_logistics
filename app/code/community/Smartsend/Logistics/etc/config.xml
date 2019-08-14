@@ -2,7 +2,7 @@
 <config>
     <modules>
         <Smartsend_Logistics>
-            <version>7.1.0</version>
+            <version>7.1.3</version>
         </Smartsend_Logistics>
     </modules>
     <frontend>
@@ -240,7 +240,7 @@
         	<smartsend>
                 <username></username>
                 <licencekey></licencekey> 
-                <validation>Please enter valid user information</validation>              
+                <validation></validation>              
                 <combinepdf>1</combinepdf>
                 <listformat>1</listformat>                      <!-- is listtype #Company, #Street, #Zipcode #City-->
                 <status></status>                      			<!-- order status -->

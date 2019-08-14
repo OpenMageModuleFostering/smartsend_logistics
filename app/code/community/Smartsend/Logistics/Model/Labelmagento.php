@@ -1,21 +1,36 @@
 <?php
 
 /**
- * Label class
+ * Smartsend_Logistics Label Magento class
  *
  * The label class is used to handle requests and responses from the Smart Send Logistics API
- * These are the CMS dependent functions that is used by the parent label class.
  *
+ * LICENSE
+ *
+ * This source file is subject to the GNU General Public License v3.0
+ * that is bundled with this package in the file license.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.html
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@smartsend.dk so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade the plugin to newer
+ * versions in the future. If you wish to customize the plugin for your
+ * needs please refer to http://www.smartsend.dk
+ *
+ * @class 		Smartsend_Logistics_Model_Labelmagento
  * @folder		/app/code/community/Smartsend/Logistics/Model/Labelmagento.php
  * @category	Smart Send
  * @package		Smartsend_Logistics
- * @class 		Smartsend_Logistics_Label
+ * @author 		Smart Send ApS
+ * @url			http://smartsend.dk/
  * @copyright	Copyright (c) Smart Send ApS (http://www.smartsend.dk)
  * @license		http://smartsend.dk/license
- * @version		Release: 7.1.0
- * @author 		Smart Send ApS
- * @link		http://smartsend.dk/download/generec
  * @since		Class available since Release 7.1.0
+ * @version		Release: 7.1.3.0
  */
 
 class Smartsend_Logistics_Model_Labelmagento extends Smartsend_Logistics_Model_Label {
@@ -197,7 +212,16 @@ class Smartsend_Logistics_Model_Labelmagento extends Smartsend_Logistics_Model_L
 	protected function sendShipmentEmail($order_number,$parcels_succes_array,$customer_email_comments=null) {
 		if(is_array($parcels_succes_array)) {
 			foreach($parcels_succes_array as $parcel) {
-				$shipment = Mage::getModel('sales/order_shipment')->load($parcel['reference']);
+			
+				if($parcel['reference'] == $order_number && count($parcels_succes_array) == 1) {
+					//The shipment is created with all unshipped items
+					$order = Mage::getModel('sales/order')->load($order_number);
+					$shipment = $order->getShipmentsCollection()->getFirstItem();
+				} else {
+					//The shipment was created by the user
+					$shipment = Mage::getModel('sales/order_shipment')->load($parcel['reference']);
+				}
+				
 				if($shipment->getId() != '') {
 					// Only send email if it has not been send already
 					if($shipment->getEmailSent() == false ) {
@@ -249,34 +273,47 @@ class Smartsend_Logistics_Model_Labelmagento extends Smartsend_Logistics_Model_L
 	}
 	
 	/*
-	 * Add a trace code to the parcel
+	 * Add a trace code to the parcel.
+	 * If order has no parcels, create a parcel with alll unshipped items
 	 *
 	 * @param string $order_number is the id of the order
 	 * @param string $shipment_number is the id of the shipment
-	 * @param string $tracking_numder is the tracking number to add
+	 * @param string $tracking_number is the tracking number to add
 	 * @param string $tracelink is the linked used to crack the parcel
 	 *
 	 * @return void
 	 */
-	protected function addTracecodeToParcel($order_number,$shipment_number,$tracking_numder,$tracelink) {
-		$shipment = Mage::getModel('sales/order_shipment')->load($shipment_number);
-		if($shipment->getId() != '') {
-			$order = Mage::getModel('sales/order')->load($shipment->getData('order_id'));
-			$smartsendorder = Mage::getModel('logistics/ordermagento');
- 			$smartsendorder->setOrderObject($order);
- 			
- 			$carrier_code = 'smartsend'.$smartsendorder->getShippingCarrier();
+	protected function addTracecodeToParcel($order_number,$shipment_number,$tracking_number,$tracelink) {
+	
+		$order = Mage::getModel('sales/order')->load($order_number);
+		$smartsendorder = Mage::getModel('logistics/ordermagento');
+ 		$smartsendorder->setOrderObject($order);
+ 		
+ 		$carrier_code = 'smartsend'.$smartsendorder->getShippingCarrier();
+ 		
+ 		//Get all shipments for the order
+		$shipments = $smartsendorder->getShipments();
 		
-			$track = Mage::getModel('sales/order_shipment_track')
-				->setShipment($shipment)
-				->setData('title', $order->getShippingDescription())
-				->setData('number', $tracking_numder)
-				->setData('carrier_code', $carrier_code)
-				->setData('order_id', $shipment->getData('order_id'))
-				->save();
+		if(empty($shipments)) {
+			// Create a shipment
+			$smartsendorder->createShipment($tracking_number);
 		} else {
-			throw new Exception( $this->getMessageString(2208) );
+			$shipment = Mage::getModel('sales/order_shipment')->load($shipment_number);
+			
+			if($shipment->getId() != '') {
+				$track = Mage::getModel('sales/order_shipment_track')
+					->setShipment($shipment)
+					->setData('title', $order->getShippingDescription())
+					->setData('number', $tracking_number)
+					->setData('carrier_code', $carrier_code)
+					->setData('order_id', $shipment->getData('order_id'))
+					->save();
+			} else {
+				throw new Exception( $this->getMessageString(2208) );
+			}
+			
 		}
+		
 	}
 	
 	/*

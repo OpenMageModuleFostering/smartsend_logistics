@@ -16,7 +16,7 @@
  * versions in the future. If you wish to customize the plugin for your
  * needs please refer to http://www.smartsend.dk
  *
- * @folder		/app/design/frontend/default/default/template/logistics/pickup.phtml
+ * @folder		/app/design/adminhtml/default/default/template/logistics/pickup.phtml
  * @category	Smartsend
  * @package		Smartsend_Logistics
  * @author		Anders Bilfeldt
@@ -58,9 +58,9 @@ if ($method == 'pickup') {  								//if shipping method is pickup then the pick
                 <?php
             } else {                  //displaying pickup data
                 ?>
-                <!--<label for="<?php echo $_code ?>_store" class="required"><em>*</em><?php echo $this->__('Select a pick-up point').':'; ?></label>-->
+                <label for="<?php echo $_code ?>_store" class=""><?php echo $this->__('Select a pick-up point').':'; ?></label>
                 <span class="input-box">
-                    <select class="required-entry" style="width:90%" name="shipping_pickup[store][<?php echo $_rate->getCode() ?>]">          <!-- table rate shipping code -->
+                    <select onchange="pickupSelect(this)" style="max-width:280px" class="pickup-delivery required-entry" name="shipping_pickup[store][<?php echo $_rate->getCode() ?>]">          <!-- table rate shipping code -->
                         <option value=''><?php echo $this->__('Select a pick-up point'); ?></option>
                         <?php
                         foreach ($result as $key => $value) {
@@ -101,14 +101,20 @@ if ($carrier[0] == 'smartsendpostdanmark' || $carrier[0] == 'smartsendposten') {
             if (count($result) > 0 || $result == true) {
                 //displaying flex data
                 ?>
-                <!--<label for="<?php echo $_code ?>_store" class="required"><em>*</em><?php echo $this->__('Select a flexdelivery option').':'; ?></label>-->
+                <label for="<?php echo $_code ?>_store" class=""><?php echo $this->__('Select a flexdelivery option').':'; ?></label>
                 <span class="input-box">
-                    <select class="required-entry" style="width:90%" name="shipping_flex[store][<?php echo $_rate->getCode() ?>]">          <!-- table rate shipping code -->
+                    <select onchange="flexSelect(this)" class="flex-delivery required-entry" style="max-width:280px" name="shipping_flex[store][<?php echo $_rate->getCode() ?>]">          <!-- table rate shipping code -->
                         <option value=''><?php echo $this->__('Select a flexdelivery option'); ?></option>
                         <?php
                         foreach ($result as $key => $value) {
+                            $s = '';
+                            if ($value == 'zip_code') {
+                                $s .= $value . " ";
+                            } else {
+                                $s .= $value . ", ";
+                            }
                             ?>
-                            <option value='<?php echo $key ?>'><?php echo $value ?></option>
+                            <option value='<?php echo $key ?>'><?php echo substr($s, 0, -2) ?></option>
                             <?php
                         }
                         ?>

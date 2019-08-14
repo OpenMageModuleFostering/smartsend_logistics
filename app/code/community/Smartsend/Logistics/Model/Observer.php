@@ -63,6 +63,40 @@ class Smartsend_Logistics_Model_Observer extends Varien_Object {
         }
     }
 
+     public function getPickupFlex($quote_id,$shippingMethod,$flex_param,$pickup_param) {             
+        $carrier 		= explode('_', $shippingMethod);
+        $carrier 		= $carrier[0];
+        
+        /* Save data about pickup point */
+        $pickup = array();
+        $pickup_t = $pickup_param;
+        if ($shippingMethod == 'smartsendpostdanmark_pickup') {
+            $pickup['store'] = $pickup_t['store']['smartsendpostdanmark_pickup'];
+        } elseif ($shippingMethod == 'smartsendposten_pickup') {
+            $pickup['store'] = $pickup_t['store']['smartsendposten_pickup'];
+        } elseif ($shippingMethod == 'smartsendgls_pickup') {
+            $pickup['store'] = $pickup_t['store']['smartsendgls_pickup'];
+        } elseif ($shippingMethod == 'smartsendbring_pickup') {
+            $pickup['store'] = $pickup_t['store']['smartsendbring_pickup'];
+        }
+
+        if ($pickup) {
+            $data = array($quote_id => $pickup);
+            Mage::getSingleton('checkout/session')->setPickup($data);
+        }
+
+		/* Save data about flex delivery */
+        if ($carrier == 'smartsendpostdanmark' || $carrier == 'smartsendposten') {
+            $flex = array();
+            $flex_t = $flex_param;
+            $flex['store'] = $flex_t['store'][$shippingMethod];
+            if ($flex) {
+                $data_flex = array($quote_id => $flex);
+                Mage::getSingleton('checkout/session')->setFlex($data_flex);
+            }
+        }
+    }
+    
     /**
      *
      * This function is called after order gets saved to database.
@@ -72,14 +106,21 @@ class Smartsend_Logistics_Model_Observer extends Varien_Object {
      * @param $evt
      */
     public function saveOrderAfter($evt) {
+       
         $order 			= $evt->getOrder();										//getting order
         $quote 			= $evt->getQuote();
         $quote_id 		= $quote->getId();
         $shippingMethod = $quote->getShippingAddress()->getShippingMethod();	//getting shipping method
-
-		$pickup 		= Mage::getSingleton('checkout/session')->getPickup();	//getting picup
-        $flex 			= Mage::getSingleton('checkout/session')->getFlex();	//getting flex
-
+       
+        if (Mage::app()->getStore()->isAdmin()) {
+            $pickup_param= Mage::app()->getRequest()->getParam('shipping_pickup');
+            $flex_param=  Mage::app()->getRequest()->getParam('shipping_flex');
+            $this->getPickupFlex($quote_id,$shippingMethod,$flex_param,$pickup_param);
+        }
+            
+        $pickup 	= Mage::getSingleton('checkout/session')->getPickup();	//getting picup
+        $flex 		= Mage::getSingleton('checkout/session')->getFlex();	//getting flex
+       
         if (isset($pickup[$quote_id])) {
 
             $temp 	= $pickup[$quote_id];

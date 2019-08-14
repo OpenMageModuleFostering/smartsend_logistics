@@ -33,8 +33,14 @@ class Smartsend_Logistics_Model_Rewrite_Sales_Total_Quote_Tax  extends Mage_Tax_
         $taxRateRequest->setProductClassId($this->_config->getShippingTaxClass($this->_store));
         
         
-        //Smart Send custom code - start
-        $shipping_method= Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress()->getShippingMethod();
+        //Smart Send custom code - start 
+        if (Mage::app()->getStore()->isAdmin() && Mage::getSingleton('adminhtml/session_quote')->hasQuote()) {
+            $shipping_method = Mage::getSingleton('adminhtml/session_quote')->getQuote()->getShippingAddress()->getShippingMethod();         //getting shipping method from admin checkout quote
+        } elseif( Mage::getSingleton('checkout/session')->hasQuote() ) {
+            $shipping_method = Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress()->getShippingMethod();               //getting shipping method from frontend checkout quote
+        } else {
+        	$shipping_method = '';
+        } 
         
         if(substr($shipping_method, 0, strlen('smartsend')) === 'smartsend') {
         

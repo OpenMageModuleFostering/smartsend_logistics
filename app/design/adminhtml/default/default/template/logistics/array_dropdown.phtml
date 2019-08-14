@@ -192,7 +192,7 @@ toggleValueElements({checked:true}, $('grid<?php echo $_htmlId ?>').parentNode);
 </style>
 <script type="text/javascript">
     document.getElementById('carriers_smartsend_validation').disabled=true;    
-    if(document.getElementById('carriers_smartsend_validation').value === 0 || document.getElementById('carriers_smartsend_validation').value === '0' || document.getElementById('carriers_smartsend_validation').value === '') {
+    if(document.getElementById('carriers_smartsend_validation').value == 0 || document.getElementById('carriers_smartsend_validation').value == '0' || document.getElementById('carriers_smartsend_validation').value == '') {
     	document.getElementById('carriers_smartsend_validation').value = '<?php echo Mage::helper('logistics')->__( 'Please enter valid user information' ); ?>';
 		document.getElementById('carriers_smartsend_validation').style.color = "red";
     } else if(document.getElementById('carriers_smartsend_validation').value != '<?php echo Mage::helper('logistics')->__( 'Please enter valid user information' ); ?>' 
@@ -210,8 +210,5 @@ toggleValueElements({checked:true}, $('grid<?php echo $_htmlId ?>').parentNode);
 				document.getElementById('carriers_smartsend_validation').value = '<?php echo Mage::helper('logistics')->__( 'Save settings to validate' ); ?>';
 				document.getElementById('carriers_smartsend_validation').style.color = "orange";
 			}
-    } else {
-    	document.getElementById('carriers_smartsend_validation').value = '<?php echo Mage::helper('logistics')->__( 'Please enter valid user information' ); ?>';
-		document.getElementById('carriers_smartsend_validation').style.color = "red";
     }
 </script>

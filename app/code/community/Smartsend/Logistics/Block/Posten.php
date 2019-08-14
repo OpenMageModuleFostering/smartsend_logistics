@@ -30,8 +30,11 @@ class Smartsend_Logistics_Block_Posten extends Mage_Checkout_Block_Onepage_Shipp
     }
 
     public function getPickupData() {
-        $checkOut 	= Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress();         //getting shipping address from checkout quote
-        
+        if (Mage::app()->getStore()->isAdmin()) {
+            $checkOut = Mage::getSingleton('adminhtml/session_quote')->getQuote()->getShippingAddress();         //getting shipping address from admin checkout quote
+        } else {
+            $checkOut = Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress();         //getting shipping address from  frontend checkout quote
+        }
         $street 	= $checkOut->getStreet();
         $street 	= implode(' ', $street);             // splitting the street by " "(space)
         $city 		= $checkOut->getCity();

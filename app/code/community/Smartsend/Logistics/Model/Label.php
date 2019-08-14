@@ -1,20 +1,36 @@
 <?php
- 
+ 	
 /**
-* Label class
-*
-* The label class is used to handle requests and responses from the Smart Send Logistics API
-*
-* @folder		/app/code/community/Smartsend/Logistics/Model/Label.php
-* @category		Smart Send
-* @package		Smartsend_Logistics
-* @class 		Smartsend_Logistics_Label
-* @copyright	Copyright (c) Smart Send ApS (http://www.smartsend.dk)
-* @license		http://smartsend.dk/license
-* @version		Release: 7.1.0
-* @author 		Smart Send ApS
-* @link			http://smartsend.dk/download/generec
-* @since		Class available since Release 7.1.0
+ * Smartsend_Logistics Label class
+ *
+ * The label class is used to handle requests and responses from the Smart Send Logistics API
+ *
+ * LICENSE
+ *
+ * This source file is subject to the GNU General Public License v3.0
+ * that is bundled with this package in the file license.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://www.gnu.org/licenses/gpl-3.0.html
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@smartsend.dk so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade the plugin to newer
+ * versions in the future. If you wish to customize the plugin for your
+ * needs please refer to http://www.smartsend.dk
+ *
+ * @class 		Smartsend_Logistics_Model_Label
+ * @folder		/app/code/community/Smartsend/Logistics/Model/Label.php
+ * @category	Smart Send
+ * @package		Smartsend_Logistics
+ * @author 		Smart Send ApS
+ * @url			http://smartsend.dk/
+ * @copyright	Copyright (c) Smart Send ApS (http://www.smartsend.dk)
+ * @license		http://smartsend.dk/license
+ * @since		Class available since Release 7.1.0
+ * @version		Release: 7.1.3
 */
 
 /*
@@ -59,7 +75,8 @@ class Smartsend_Logistics_Model_Label extends Mage_Core_Model_Abstract {
 	
 	protected $messages=array();
 	
-	protected $show_order_succes = true;
+	protected $show_order_succes_pdf = true;
+	protected $show_order_succes_link = true;
 	
 	public function __construct() {
 	}
@@ -143,12 +160,21 @@ class Smartsend_Logistics_Model_Label extends Mage_Core_Model_Abstract {
 	}
 	
 	/**
-     * This method returns whether or not to show the individual order succes
+     * This method returns whether or not to show the individual order succes for PDF
      *
 	 * @return boolean
 	 */
-	protected function getShowOrderSucces() {
-		return $this->show_order_succes;
+	protected function getShowOrderSuccesPdf() {
+		return $this->show_order_succes_pdf;
+	}
+	
+	/**
+     * This method returns whether or not to show the individual order succes for link
+     *
+	 * @return boolean
+	 */
+	protected function getShowOrderSuccesLink() {
+		return $this->show_order_succes_link;
 	}
 	
 	
@@ -270,12 +296,16 @@ class Smartsend_Logistics_Model_Label extends Mage_Core_Model_Abstract {
      *
 	 * @return void
 	 */
-	private function setResponseCode($response_code) {
+	protected function setResponseCode($response_code) {
 		$this->response_code = $response_code;
 	}
 	
-	public function setShowOrderSucces($boolean) {
-		$this->show_order_succes = $boolean;
+	protected function setShowOrderSuccesPdf($boolean) {
+		$this->show_order_succes_pdf = $boolean;
+	}
+	
+	protected function setShowOrderSuccesLink($boolean) {
+		$this->show_order_succes_link = $boolean;
 	}
 	
 	/**
@@ -376,10 +406,17 @@ class Smartsend_Logistics_Model_Label extends Mage_Core_Model_Abstract {
 			}
 		}
 		
-		if( !(isset($response['combine_pdf']) && $response['combine_pdf'] != '') && !(isset($order_response['combine_link']) && $order_response['combine_link'] != '') ){
-			$this->setShowOrderSucces(true);
+		//Set whether or not to show individual PDF files
+		if( isset($response['combine_pdf']) && $response['combine_pdf'] != '' && $settings['combine_pdf_labels']){
+			$this->setShowOrderSuccesPdf(false);
 		} else {
-			$this->setShowOrderSucces(!$settings['combine_pdf_labels']);
+			$this->setShowOrderSuccesPdf(true);
+		}
+		//Set whether or not to show individual label links
+		if( isset($response['combine_link']) && $response['combine_link'] != '' && $settings['combine_pdf_labels']){
+			$this->setShowOrderSuccesLink(false);
+		} else {
+			$this->setShowOrderSuccesLink(true);
 		}
 		
 		if(isset($response['orders']) && is_array($response['orders'])) {
@@ -394,15 +431,14 @@ class Smartsend_Logistics_Model_Label extends Mage_Core_Model_Abstract {
 				}
 			}
 			
-			if( $settings['combine_pdf_labels'] ) {
-				// Show the combined link or PDF link
-				if(isset($response['combine_pdf']) && $response['combine_pdf'] != '') {
-					// Add link to PDF label
-					$this->addSuccessMessage('<a href="' . $response['combine_pdf'] . '" target="_blank">' . $this->getMessageString(2101) . '</a>' );
-				} elseif(isset($order_response['combine_link']) && $order_response['combine_link'] != '') {
-					// Add link to label
-					$this->addSuccessMessage('<a href="' . $response['combine_link'] . '" target="_blank">' . $this->getMessageString(2102) . '</a>' );
-				}
+			// Add link to combined PDF label
+			if( !$this->getShowOrderSuccesPdf() ) {
+				$this->addSuccessMessage('<a href="' . $response['combine_pdf'] . '" target="_blank">' . $this->getMessageString(2101) . '</a>' );
+			}
+			
+			// Add link to combined label print
+			if( !$this->getShowOrderSuccesLink() ) {
+				$this->addSuccessMessage('<a href="' . $response['combine_link'] . '" target="_blank">' . $this->getMessageString(2102) . '</a>' );
 			}
 		} elseif(isset($response['orderno'])) {
 			$this->handleOrderResponse($response);
@@ -435,7 +471,7 @@ class Smartsend_Logistics_Model_Label extends Mage_Core_Model_Abstract {
  			if(isset($order_response['pdflink'])) {
  				$order_comment .= '<br><a href="' . $order_response['pdflink'] . '" target="_blank">' . $this->getMessageString(2103) . '</a>';
  			}
-			if(is_array($order_response['parcels'])) {
+			if(isset($order_response['parcels']) && is_array($order_response['parcels'])) {
 				// This array will be used to send shipment emails
 				$parcels_succes_array = array();
 				
@@ -475,16 +511,17 @@ class Smartsend_Logistics_Model_Label extends Mage_Core_Model_Abstract {
 				}
 				
 				// Show succes message with label link or pdf link
-				if($this->getShowOrderSucces()) {
-					if(isset($order_response['pdflink']) && $order_response['pdflink'] != '') {
-						// Add link to PDF label
-						$this->addSuccessMessage( $this->getMessageString(2000) . ' '. $smartsendorder->getOrderReference() .': <a href="' . $order_response['pdflink'] . '" target="_blank">' . $this->getMessageString(2103) . '</a>' );
-					} elseif(isset($order_response['link']) && $order_response['link'] != '') {
-						// Add link to label
-						$this->addSuccessMessage( $this->getMessageString(2000) . ' '. $smartsendorder->getOrderReference() .': <a href="' . $order_response['link'] . '" target="_blank">' . $this->getMessageString(2104) . '</a>' );
-					} else {
-						 throw new Exception( $this->getMessageString(2207) );
-					}
+				if($this->getShowOrderSuccesPdf() && isset($order_response['pdflink']) && $order_response['pdflink'] != '') {
+					// Add link to PDF label
+					$this->addSuccessMessage( $this->getMessageString(2000) . ' '. $smartsendorder->getOrderReference() .': <a href="' . $order_response['pdflink'] . '" target="_blank">' . $this->getMessageString(2103) . '</a>' );
+				} elseif($this->getShowOrderSuccesLink() && isset($order_response['link']) && $order_response['link'] != '') {
+					// Add link to label
+					$this->addSuccessMessage( $this->getMessageString(2000) . ' '. $smartsendorder->getOrderReference() .': <a href="' . $order_response['link'] . '" target="_blank">' . $this->getMessageString(2104) . '</a>' );
+				} elseif( ( $this->getShowOrderSuccesLink() || $this->getShowOrderSuccesLink() ) && ( isset($order_response['pdflink']) && $order_response['pdflink'] != '') &&  (isset($order_response['link']) && $order_response['link'] != '') ) {
+					//There should be shown either a PDF or a link, but non is there!
+					throw new Exception( $this->getMessageString(2207) );
+				} else {
+					//Do nothing as there is shown a combined PDF link or print link
 				}
 				
 			} else {

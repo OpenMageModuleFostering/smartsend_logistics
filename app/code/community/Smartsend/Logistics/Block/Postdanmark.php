@@ -30,8 +30,11 @@ class Smartsend_Logistics_Block_Postdanmark extends Mage_Checkout_Block_Onepage_
     }
 
     public function getPickupData() {
-        $checkOut 	= Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress();         //getting shipping address from checkout quote
-        
+        if (Mage::app()->getStore()->isAdmin()) {
+            $checkOut = Mage::getSingleton('adminhtml/session_quote')->getQuote()->getShippingAddress();         //getting shipping address from admin checkout quote
+        } else {
+            $checkOut = Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress();         //getting shipping address from  frontend checkout quote
+        }
         $street 	= $checkOut->getStreet();
         $street 	= implode(' ', $street);             // splitting the street by " "(space)
         $city 		= $checkOut->getCity();
@@ -53,11 +56,16 @@ class Smartsend_Logistics_Block_Postdanmark extends Mage_Checkout_Block_Onepage_
     public function getFlexData($carrier) {
 
         $array = array(
-        	$this->__('By the frontdoor')		=> $this->__('By the frontdoor'),
-        	$this->__('By the carport')			=> $this->__('By the carport'),
-        	$this->__('By the back dor')		=> $this->__('By the back dor'),
-        	$this->__('I have Modtagerflex')	=> $this->__('I have Modtagerflex'),
-        	$this->__('Can be left unattended')	=> $this->__('Can be left unattended')
+        	$this->__('By the front door')			=> $this->__('By the front door'),
+        	$this->__('By the back door')			=> $this->__('By the back door'),
+        	$this->__('One the porch')				=> $this->__('One the porch'),
+        	$this->__('In the greenhouse')			=> $this->__('In the greenhouse'),
+        	$this->__('In the garage/carport')		=> $this->__('In the garage/carport'),
+        	$this->__('In the tool shed')			=> $this->__('In the tool shed'),
+        	$this->__('In the playhouse')			=> $this->__('In the playhouse'),
+        	$this->__('Under the roof of the porch')=> $this->__('Under the roof of the porch'),
+        	$this->__('I have Modtagerflex')		=> $this->__('I have Modtagerflex'),
+        	$this->__('Can be left unattended')		=> $this->__('Can be left unattended'),
         	);
         $array2 = array();
         $flexShippingMethods = Mage::getStoreConfig('carriers/smartsendpostdanmark/flexdelivery');

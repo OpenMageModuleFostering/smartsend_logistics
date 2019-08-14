@@ -121,9 +121,8 @@ if (!($_shippingRateGroups = $this->getShippingRates())):                       
                                 <li class="radioparent">
                                     <label for="s_method_<?php echo $_rate->getCode() ?>"><?php echo $_rate->getMethodTitle() ?>               <!-- get method title and the code -->
 
-                                        <input name="shipping_method" type="radio" class=" radio validate-one-required-by-name" value="<?php echo $_rate->getCode() ?>" id="s_method_<?php echo $_rate->getCode() ?>"<?php if ($_rate->getCode() === $this->getAddressShippingMethod()) echo ' checked="checked"' ?> onclick="save_shipping_method(shipping_method_url, update_shipping_payment, update_shipping_review);
-                                                                    showShipping(<?php echo "'" . $_rate->getCode() . "'"; ?>, 's_method_<?php echo $_rate->getCode() ?>');" />
-                                        <?php if ($_rate->getCode() === $this->getAddressShippingMethod()) echo '<script type="text/javascript"> showShipping("' . $_rate->getCode() . '","s_method_' . $_rate->getCode() . '" );</script>;' ?>
+                                        <input name="shipping_method" type="radio" class=" radio validate-one-required-by-name" value="<?php echo $_rate->getCode() ?>" id="s_method_<?php echo $_rate->getCode() ?>"<?php if ($_rate->getCode() === $this->getAddressShippingMethod()) echo ' checked="checked"'; ?> onclick="save_shipping_method(shipping_method_url, update_shipping_payment, update_shipping_review); showShipping('<?php echo $_rate->getCode(); ?>', 's_method_<?php echo $_rate->getCode() ?>');" />
+                                        <?php if ($_rate->getCode() === $this->getAddressShippingMethod()) echo '<script type="text/javascript"> showShipping("' . $_rate->getCode() . '","s_method_' . $_rate->getCode() . '" );</script>' ?>
                                         <span class="outer"><span class="inner"></span></span>
                                             <?php
                                             $shipping_method = $_rate->getCode();
