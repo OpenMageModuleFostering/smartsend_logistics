@@ -1,16 +1,19 @@
 {
-    "name": "OpenMageModuleFostering/Smartsend_Logistics",
+    "name": "OpenMageModuleFostering\/Smartsend_Logistics",
     "type": "magento-module",
     "license": "GPL",
     "homepage": "",
     "description": "Smart Send Logistics shipping module",
     "authors": [
-    {
-        "name": "Smart Send ApS",
-        "email": "anders@smartsend.dk"
-    }
-],
+        {
+            "name": "Smart Send ApS",
+            "email": "anders@smartsend.dk"
+        }
+    ],
     "suggest": {
-        "magento-hackathon/magento-composer-installer": "*"
-    }
+        "magento-hackathon\/magento-composer-installer": "*"
+    },
+    "keywords": [
+        "openmage-module"
+    ]
 }
